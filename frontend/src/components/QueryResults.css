@@ -1,0 +1,44 @@
+.query-results {
+  border: 1px solid #111;
+  background: #fff;
+  padding: 1rem 1.1rem;
+}
+
+.query-results__title {
+  margin: 0 0 0.85rem;
+  font-family: "Libre Baskerville", "Times New Roman", Times, serif;
+  font-size: 1.15rem;
+}
+
+.query-results__empty {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.query-results__table-wrap {
+  overflow-x: auto;
+}
+
+.query-results__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.query-results__table th,
+.query-results__table td {
+  border: 1px solid #ccc;
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+}
+
+.query-results__table th {
+  background: #f0f0f0;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.query-results__table td {
+  font-family: "IBM Plex Mono", "Courier New", Courier, monospace;
+}

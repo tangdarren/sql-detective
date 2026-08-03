@@ -1,0 +1,28 @@
+.primary-button {
+  display: inline-block;
+  padding: 0.85rem 1.5rem;
+  border: 2px solid #111;
+  background: #111;
+  color: #fff;
+  font-family: "IBM Plex Mono", "Courier New", Courier, monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.primary-button:hover {
+  background: #fff;
+  color: #111;
+}
+
+.primary-button:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 3px;
+}
+
+.primary-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

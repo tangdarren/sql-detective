@@ -1,0 +1,26 @@
+.case-briefing {
+  border: 1px solid #111;
+  background: #fff;
+  padding: 1rem 1.1rem;
+}
+
+.case-briefing__title {
+  margin: 0;
+  font-family: "Libre Baskerville", "Times New Roman", Times, serif;
+  font-size: 1.15rem;
+}
+
+.case-briefing__level {
+  margin: 0.55rem 0 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.case-briefing__objective {
+  margin: 0.55rem 0 0;
+  color: #222;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}

@@ -1,0 +1,58 @@
+.case-intro {
+  min-height: 100vh;
+  padding: 2rem 1.25rem;
+  display: flex;
+  justify-content: center;
+}
+
+.case-intro__folder {
+  position: relative;
+  width: min(56rem, 100%);
+  padding: 2rem 1.75rem 2.25rem;
+  border: 1px solid #111;
+  background: #fff;
+  box-shadow: 3px 3px 0 #e2e2e2;
+}
+
+.case-intro__stamp {
+  position: absolute;
+  top: 1.4rem;
+  right: 1.5rem;
+}
+
+.case-intro__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 1.75rem;
+  align-items: start;
+}
+
+.case-intro__section-title {
+  margin: 0 0 0.85rem;
+  font-family: "Libre Baskerville", "Times New Roman", Times, serif;
+  font-size: 1.25rem;
+}
+
+.case-intro__copy {
+  margin: 0 0 1rem;
+  color: #222;
+  line-height: 1.55;
+  font-size: 0.95rem;
+}
+
+.case-intro__details .primary-button {
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 860px) {
+  .case-intro__stamp {
+    position: static;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+  }
+
+  .case-intro__layout {
+    grid-template-columns: 1fr;
+  }
+}

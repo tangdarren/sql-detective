@@ -1,21 +1,16 @@
-import './App.css'
-import DetectivePlaceholder from './components/DetectivePlaceholder'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import CaseIntroductionPage from './pages/CaseIntroductionPage'
+import InvestigationWorkspacePage from './pages/InvestigationWorkspacePage'
+import LandingPage from './pages/LandingPage'
 
 function App() {
   return (
-    <main className="landing">
-      <div className="landing__content">
-        <DetectivePlaceholder />
-        <h1 className="landing__title">SQL Detective.</h1>
-        <p className="landing__subtitle">Query the evidence. Solve the case.</p>
-        <p className="landing__hint">
-          <code>SELECT clue FROM evidence WHERE case_id = 1;</code>
-        </p>
-        <button type="button" className="landing__cta">
-          Start Investigation
-        </button>
-      </div>
-    </main>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/case/01" element={<CaseIntroductionPage />} />
+      <Route path="/case/01/investigate" element={<InvestigationWorkspacePage />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 

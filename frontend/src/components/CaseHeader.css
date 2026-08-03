@@ -1,0 +1,27 @@
+.case-header {
+  border-bottom: 1px solid #111;
+  padding-bottom: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.case-header__file {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.case-header__title {
+  margin: 0;
+  font-family: "Libre Baskerville", "Times New Roman", Times, serif;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.case-header__subtitle {
+  margin: 0.45rem 0 0;
+  color: #444;
+  font-size: 0.95rem;
+}

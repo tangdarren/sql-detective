@@ -1,5 +1,14 @@
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Libre+Baskerville:wght@400;700&display=swap");
 
+:root {
+  --ink: #111;
+  --paper: #f7f4ef;
+  --sheet: #fff;
+  --muted: #666;
+  --border: #111;
+  --stamp: #8b1e1e;
+}
+
 *,
 *::before,
 *::after {
@@ -15,12 +24,18 @@ body,
 
 body {
   font-family: "IBM Plex Mono", "Courier New", Courier, monospace;
-  background: #fafafa;
-  color: #111;
+  background: var(--paper);
+  color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-button {
+button,
+textarea,
+input {
   font: inherit;
+}
+
+a {
+  color: inherit;
 }
