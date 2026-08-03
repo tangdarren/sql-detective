@@ -185,7 +185,7 @@ describe('InvestigationWorkspacePage', () => {
 
     expect(getCompletedLevels()).toEqual([1])
 
-    await user.click(screen.getByRole('button', { name: 'Reset Progress' }))
+    await user.click(screen.getByRole('button', { name: 'Restart Case' }))
 
     expect(getCompletedLevels()).toEqual([])
     expect(getDraft(1)).toBeNull()

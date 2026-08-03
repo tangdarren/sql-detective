@@ -43,8 +43,10 @@ describe('App navigation', () => {
     expect(screen.getByRole('heading', { name: 'SQL Detective.' })).toBeInTheDocument()
     expect(screen.getByText('Query the evidence. Solve the case.')).toBeInTheDocument()
     expect(
-      screen.getByText(/Investigate fictional crimes by writing real SQL queries/i),
+      screen.getByText(/investigate a fictional hotel theft by writing real SQL/i),
     ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'SQL concepts you will use' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Instructions' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Start Investigation' })).toBeInTheDocument()
   })
 

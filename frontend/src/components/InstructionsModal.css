@@ -1,0 +1,72 @@
+.instructions-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.instructions-modal__panel {
+  width: min(34rem, 100%);
+  max-height: min(85vh, 40rem);
+  overflow: auto;
+  padding: 1.5rem 1.4rem;
+  border: 1px solid #111;
+  background: #fff;
+}
+
+.instructions-modal__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.instructions-modal__header h2 {
+  margin: 0;
+  font-family: "Libre Baskerville", "Times New Roman", Times, serif;
+  font-size: 1.35rem;
+}
+
+.instructions-modal__close {
+  padding: 0.35rem 0.7rem;
+  border: 1px solid #111;
+  background: #fff;
+  color: #111;
+  cursor: pointer;
+}
+
+.instructions-modal__close:hover,
+.instructions-modal__close:focus-visible {
+  background: #111;
+  color: #fff;
+}
+
+.instructions-modal__close:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 2px;
+}
+
+.instructions-modal__list {
+  margin: 0;
+  padding-left: 1.2rem;
+  line-height: 1.55;
+  color: #222;
+}
+
+.instructions-modal__list li + li {
+  margin-top: 0.55rem;
+}
+
+.instructions-modal__note {
+  margin: 1.1rem 0 1.35rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid #ccc;
+  color: #333;
+  line-height: 1.5;
+  font-size: 0.9rem;
+}

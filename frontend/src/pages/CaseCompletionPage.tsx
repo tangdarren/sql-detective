@@ -5,15 +5,14 @@ import EvidenceIllustration from '../components/EvidenceIllustration'
 import EvidencePhoto from '../components/EvidencePhoto'
 import PrimaryButton from '../components/PrimaryButton'
 import { blackwoodResolution } from '../data/blackwoodResolution'
-import { getCompletedLevels, resetProgress } from '../lib/progressStorage'
+import { areAllLevelsCompleted, resetProgress } from '../lib/progressStorage'
 import './CaseCompletionPage.css'
 
 const TOTAL_LEVELS = 5
 
 function CaseCompletionPage() {
   const navigate = useNavigate()
-  const completed = getCompletedLevels()
-  const caseClosed = TOTAL_LEVELS > 0 && completed.length >= TOTAL_LEVELS
+  const caseClosed = areAllLevelsCompleted(TOTAL_LEVELS)
 
   if (!caseClosed) {
     return <Navigate to="/case/01/investigate" replace />
@@ -38,7 +37,7 @@ function CaseCompletionPage() {
 
         <div className="case-complete__layout">
           <EvidencePhoto caption="Final suspect sketch — Room 410">
-            <EvidenceIllustration filename="final-suspect.svg" />
+            <EvidenceIllustration filename="final-thief-reveal.svg" />
           </EvidencePhoto>
 
           <section className="case-complete__details">

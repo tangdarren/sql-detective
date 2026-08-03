@@ -1,16 +1,7 @@
 .case-complete {
   min-height: 100vh;
   padding: 2rem 1.25rem 3rem;
-  background:
-    radial-gradient(circle at top, rgba(0, 0, 0, 0.04), transparent 45%),
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0, 0, 0, 0.015) 2px,
-      rgba(0, 0, 0, 0.015) 3px
-    ),
-    #f7f7f7;
+  background: #f4f4f4;
 }
 
 .case-complete__folder {
@@ -95,13 +86,13 @@
 }
 
 .case-complete__secondary {
-  background: #fff;
-  color: #111;
+  background: #fff !important;
+  color: #111 !important;
 }
 
 .case-complete__secondary:hover {
-  background: #111;
-  color: #fff;
+  background: #111 !important;
+  color: #fff !important;
 }
 
 @media (max-width: 800px) {

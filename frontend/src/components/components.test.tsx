@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 import CaseBriefing from './CaseBriefing'
 import CaseHeader from './CaseHeader'
 import ConfidentialStamp from './ConfidentialStamp'
+import EvidenceIllustration from './EvidenceIllustration'
 import EvidencePhoto from './EvidencePhoto'
 import LevelNavigation from './LevelNavigation'
 import PrimaryButton from './PrimaryButton'
@@ -32,6 +33,11 @@ describe('major components', () => {
 
     expect(screen.getByText('Crime scene sketch')).toBeInTheDocument()
     expect(screen.getByAltText('placeholder')).toBeInTheDocument()
+  })
+
+  it('renders EvidenceIllustration from local assets', () => {
+    render(<EvidenceIllustration filename="hotel-exterior.svg" />)
+    expect(screen.getByAltText(/Blackwood Hotel exterior/i)).toBeInTheDocument()
   })
 
   it('renders LevelNavigation and handles selection', async () => {

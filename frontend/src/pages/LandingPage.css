@@ -3,40 +3,103 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem 1.25rem;
+  padding: 2.5rem 1.25rem;
+  background: #f4f4f4;
 }
 
 .landing-page__sheet {
-  width: min(34rem, 100%);
-  padding: 2rem 1.75rem;
+  width: min(38rem, 100%);
+  padding: 2.25rem 1.85rem 2rem;
   border: 1px solid #111;
   background: #fff;
-  box-shadow: 2px 2px 0 #ddd;
   text-align: center;
 }
 
 .landing-page__sheet .evidence-photo {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.4rem;
+}
+
+.landing-page__eyebrow {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #666;
 }
 
 .landing-page__title {
-  margin: 0;
+  margin: 0.45rem 0 0;
   font-family: "Libre Baskerville", "Times New Roman", Times, serif;
-  font-size: clamp(2.3rem, 6vw, 3.4rem);
-  line-height: 1.1;
+  font-size: clamp(2.4rem, 6vw, 3.5rem);
+  line-height: 1.08;
 }
 
 .landing-page__subtitle {
-  margin: 0.85rem 0 0;
+  margin: 0.8rem 0 0;
   font-family: "Libre Baskerville", "Times New Roman", Times, serif;
   font-size: clamp(1rem, 2.4vw, 1.2rem);
-  color: #444;
+  color: #333;
 }
 
 .landing-page__description {
-  margin: 1.1rem auto 1.6rem;
-  max-width: 28rem;
+  margin: 1rem auto 1.5rem;
+  max-width: 30rem;
   color: #333;
-  line-height: 1.55;
+  line-height: 1.6;
   font-size: 0.95rem;
+}
+
+.landing-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 1.75rem;
+}
+
+.landing-page__ghost {
+  padding: 0.85rem 1.5rem;
+  border: 2px solid #111;
+  background: #fff;
+  color: #111;
+  cursor: pointer;
+}
+
+.landing-page__ghost:hover {
+  background: #111;
+  color: #fff;
+}
+
+.landing-page__ghost:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 3px;
+}
+
+.landing-page__concepts {
+  border-top: 1px solid #111;
+  padding-top: 1.25rem;
+  text-align: left;
+}
+
+.landing-page__concepts h2 {
+  margin: 0 0 0.75rem;
+  font-family: "Libre Baskerville", "Times New Roman", Times, serif;
+  font-size: 1.1rem;
+}
+
+.landing-page__concepts ul {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: #222;
+  line-height: 1.55;
+  font-size: 0.9rem;
+}
+
+.landing-page__concepts li + li {
+  margin-top: 0.45rem;
+}
+
+.landing-page__concepts strong {
+  font-family: "IBM Plex Mono", "Courier New", Courier, monospace;
+  font-weight: 500;
 }

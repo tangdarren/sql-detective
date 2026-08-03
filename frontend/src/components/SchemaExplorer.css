@@ -35,6 +35,11 @@
   color: #fff;
 }
 
+.schema-explorer__table:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 2px;
+}
+
 .schema-explorer__columns {
   margin-top: 0.9rem;
   border-top: 1px solid #ddd;

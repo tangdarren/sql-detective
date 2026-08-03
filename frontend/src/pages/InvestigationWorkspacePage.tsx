@@ -17,10 +17,12 @@ import type {
   TableSummary,
 } from '../api/types'
 import { ApiError } from '../api/types'
+import { resolveEvidenceAsset } from '../assets/evidenceCatalog'
 import CaseBriefing from '../components/CaseBriefing'
 import CaseHeader from '../components/CaseHeader'
 import EvidenceIllustration from '../components/EvidenceIllustration'
 import EvidencePhoto from '../components/EvidencePhoto'
+import InstructionsModal from '../components/InstructionsModal'
 import LevelNavigation from '../components/LevelNavigation'
 import PrimaryButton from '../components/PrimaryButton'
 import QueryFeedback from '../components/QueryFeedback'
@@ -44,6 +46,7 @@ type LoadState = 'loading' | 'ready' | 'empty' | 'unavailable'
 function InvestigationWorkspacePage() {
   const navigate = useNavigate()
   const [loadState, setLoadState] = useState<LoadState>('loading')
+  const [instructionsOpen, setInstructionsOpen] = useState(false)
   const [caseSummary, setCaseSummary] = useState<CaseSummary | null>(null)
   const [challengeSummaries, setChallengeSummaries] = useState<ChallengeSummary[]>([])
   const [activeLevel, setActiveLevel] = useState(1)
@@ -251,9 +254,9 @@ function InvestigationWorkspacePage() {
     navigate('/case/01/complete')
   }
 
-  function handleResetProgress() {
+  function handleRestartCase() {
     const confirmed = window.confirm(
-      'Reset all investigation progress and saved SQL drafts for this case?',
+      'Restart Case 01? This clears completed levels and saved SQL drafts.',
     )
     if (!confirmed) {
       return
@@ -298,9 +301,22 @@ function InvestigationWorkspacePage() {
     return (
       <main className="workspace">
         <div className="workspace__status workspace__status--error" role="alert">
+          <p className="workspace__status-label">Connection error</p>
           <h1>Archive unavailable</h1>
-          <p>The investigation server could not be reached. Start the backend and try again.</p>
-          <PrimaryButton onClick={() => window.location.reload()}>Retry</PrimaryButton>
+          <p>
+            The investigation server could not be reached. Start PostgreSQL and the Spring Boot
+            API, then retry.
+          </p>
+          <ol className="workspace__status-steps">
+            <li>
+              <code>docker compose up -d</code>
+            </li>
+            <li>
+              <code>cd backend && ./mvnw spring-boot:run</code>
+            </li>
+            <li>Reload this page</li>
+          </ol>
+          <PrimaryButton onClick={() => window.location.reload()}>Retry connection</PrimaryButton>
         </div>
       </main>
     )
@@ -318,6 +334,7 @@ function InvestigationWorkspacePage() {
   }
 
   const hasNextLevel = activeLevel < totalLevels
+  const evidenceAsset = resolveEvidenceAsset(challenge?.evidenceImageFilename)
 
   return (
     <main className="workspace">
@@ -327,18 +344,27 @@ function InvestigationWorkspacePage() {
             title={caseSummary?.title ?? 'Case 01: The Blackwood Hotel'}
             subtitle={`Investigation Workspace · Level ${activeLevel}`}
           />
-          <button type="button" className="workspace__reset-progress" onClick={handleResetProgress}>
-            Reset Progress
-          </button>
+          <div className="workspace__toolbar">
+            <button
+              type="button"
+              className="workspace__tool-button"
+              onClick={() => setInstructionsOpen(true)}
+            >
+              Instructions
+            </button>
+            <button
+              type="button"
+              className="workspace__tool-button"
+              onClick={handleRestartCase}
+            >
+              Restart Case
+            </button>
+          </div>
         </div>
 
         <div className="workspace__body">
           <aside className="workspace__left">
-            <EvidencePhoto
-              caption={`Evidence photo — Level ${activeLevel}${
-                challenge ? `: ${challenge.title}` : ''
-              }`}
-            >
+            <EvidencePhoto caption={evidenceAsset.caption}>
               <EvidenceIllustration filename={challenge?.evidenceImageFilename} />
             </EvidencePhoto>
             <LevelNavigation
@@ -407,6 +433,8 @@ function InvestigationWorkspacePage() {
           />
         </div>
       </div>
+
+      <InstructionsModal open={instructionsOpen} onClose={() => setInstructionsOpen(false)} />
     </main>
   )
 }

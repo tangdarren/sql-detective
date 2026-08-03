@@ -1,8 +1,9 @@
 .workspace {
   min-height: 100vh;
-  padding: 1.5rem 1.25rem 2rem;
+  padding: 1.75rem 1.25rem 2.25rem;
   display: flex;
   justify-content: center;
+  background: #f4f4f4;
 }
 
 .workspace__folder {
@@ -10,7 +11,6 @@
   padding: 1.5rem 1.4rem 1.6rem;
   border: 1px solid #111;
   background: #fff;
-  box-shadow: 3px 3px 0 #e2e2e2;
 }
 
 .workspace__top {
@@ -18,26 +18,38 @@
   justify-content: space-between;
   gap: 1rem;
   align-items: flex-start;
+  margin-bottom: 0.35rem;
 }
 
 .workspace__top .case-header {
   flex: 1;
 }
 
-.workspace__reset-progress {
+.workspace__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   margin-top: 0.35rem;
-  padding: 0.4rem 0.7rem;
-  border: 1px solid #666;
+}
+
+.workspace__tool-button {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #111;
   background: #fff;
-  color: #333;
+  color: #111;
   font-size: 0.75rem;
   letter-spacing: 0.04em;
   cursor: pointer;
 }
 
-.workspace__reset-progress:hover {
-  border-color: #111;
-  color: #111;
+.workspace__tool-button:hover {
+  background: #111;
+  color: #fff;
+}
+
+.workspace__tool-button:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 2px;
 }
 
 .workspace__body {
@@ -74,15 +86,37 @@
   text-align: left;
 }
 
+.workspace__status-label {
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8b1e1e;
+}
+
 .workspace__status h1 {
   margin: 0;
   font-family: "Libre Baskerville", "Times New Roman", Times, serif;
 }
 
 .workspace__status p {
-  margin: 0.85rem 0 1.25rem;
+  margin: 0.85rem 0 1rem;
   color: #444;
-  line-height: 1.5;
+  line-height: 1.55;
+}
+
+.workspace__status-steps {
+  margin: 0 auto 1.35rem;
+  padding-left: 1.2rem;
+  max-width: 26rem;
+  text-align: left;
+  color: #333;
+  line-height: 1.55;
+}
+
+.workspace__status-steps code {
+  font-family: "IBM Plex Mono", "Courier New", Courier, monospace;
+  font-size: 0.85rem;
 }
 
 .workspace__status--error {

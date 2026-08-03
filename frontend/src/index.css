@@ -2,11 +2,12 @@
 
 :root {
   --ink: #111;
-  --paper: #f7f4ef;
+  --paper: #f4f4f4;
   --sheet: #fff;
   --muted: #666;
   --border: #111;
   --stamp: #8b1e1e;
+  --focus: #111;
 }
 
 *,
@@ -38,4 +39,13 @@ input {
 
 a {
   color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+button:focus:not(:focus-visible) {
+  outline: none;
 }

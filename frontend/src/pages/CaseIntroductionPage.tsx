@@ -1,12 +1,27 @@
+import { useState } from 'react'
 import CaseHeader from '../components/CaseHeader'
 import ConfidentialStamp from '../components/ConfidentialStamp'
+import EvidenceIllustration from '../components/EvidenceIllustration'
 import EvidencePhoto from '../components/EvidencePhoto'
-import HotelIllustration from '../components/HotelIllustration'
+import InstructionsModal from '../components/InstructionsModal'
 import PrimaryButton from '../components/PrimaryButton'
 import { blackwoodHotelCase } from '../data/blackwoodCase'
+import { resetProgress } from '../lib/progressStorage'
 import './CaseIntroductionPage.css'
 
 function CaseIntroductionPage() {
+  const [instructionsOpen, setInstructionsOpen] = useState(false)
+
+  function handleRestartCase() {
+    const confirmed = window.confirm(
+      'Restart Case 01? This clears completed levels and saved SQL drafts.',
+    )
+    if (!confirmed) {
+      return
+    }
+    resetProgress()
+  }
+
   return (
     <main className="case-intro">
       <div className="case-intro__folder">
@@ -21,7 +36,7 @@ function CaseIntroductionPage() {
 
         <div className="case-intro__layout">
           <EvidencePhoto caption="Crime scene sketch — Room 417">
-            <HotelIllustration variant="room" />
+            <EvidenceIllustration filename="missing-painting.svg" />
           </EvidencePhoto>
 
           <section className="case-intro__details">
@@ -31,10 +46,29 @@ function CaseIntroductionPage() {
               A valuable painting disappeared from Room 417 during a private event.
               Cross-examine the hotel records. Follow the data. Name the thief.
             </p>
-            <PrimaryButton to="/case/01/investigate">Open Case File</PrimaryButton>
+
+            <div className="case-intro__actions">
+              <PrimaryButton to="/case/01/investigate">Open Case File</PrimaryButton>
+              <button
+                type="button"
+                className="case-intro__secondary"
+                onClick={() => setInstructionsOpen(true)}
+              >
+                Instructions
+              </button>
+              <button
+                type="button"
+                className="case-intro__secondary"
+                onClick={handleRestartCase}
+              >
+                Restart Case
+              </button>
+            </div>
           </section>
         </div>
       </div>
+
+      <InstructionsModal open={instructionsOpen} onClose={() => setInstructionsOpen(false)} />
     </main>
   )
 }

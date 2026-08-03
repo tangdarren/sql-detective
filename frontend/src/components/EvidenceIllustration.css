@@ -1,0 +1,8 @@
+.evidence-illustration {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 320 / 220;
+  object-fit: cover;
+  background: #f5f5f5;
+}
