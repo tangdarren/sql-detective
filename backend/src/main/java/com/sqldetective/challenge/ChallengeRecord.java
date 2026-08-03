@@ -11,6 +11,7 @@ public record ChallengeRecord(
         String successClue,
         String difficulty,
         boolean orderSensitive,
-        String expectedQuery
+        String expectedQuery,
+        String evidenceImageFilename
 ) {
 }

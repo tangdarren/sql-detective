@@ -5,12 +5,14 @@ import { ApiError } from '../api/types'
 import {
   getCompletedLevels,
   getDraft,
+  markLevelCompleted,
   resetProgress,
   saveDraft,
 } from '../lib/progressStorage'
 import { renderWithRouter } from '../test/renderWithRouter'
 import {
   correctExecution,
+  finalLevelExecution,
   forbiddenExecution,
   incorrectExecution,
   mockCase,
@@ -108,7 +110,7 @@ describe('InvestigationWorkspacePage', () => {
 
     expect(await screen.findByText('CASE SOLVED')).toBeInTheDocument()
     expect(
-      screen.getByText('Several guests stayed on the fourth floor near Room 417 that night.'),
+      screen.getByText(/Several guests stayed on the fourth floor near Room 417 that night/i),
     ).toBeInTheDocument()
     expect(getCompletedLevels()).toEqual([1])
 
@@ -203,5 +205,18 @@ describe('InvestigationWorkspacePage', () => {
     expect(
       screen.getByText(/The investigation server could not be reached/i),
     ).toBeInTheDocument()
+  })
+
+  it('offers case closure after the final level is solved', async () => {
+    const user = userEvent.setup()
+    for (let level = 1; level <= 4; level += 1) {
+      markLevelCompleted(level)
+    }
+    executeQuery.mockResolvedValue(finalLevelExecution)
+
+    await renderWorkspace('Identify the Thief')
+
+    await user.click(screen.getByRole('button', { name: 'Run Query' }))
+    expect(await screen.findByRole('button', { name: 'Close the Case' })).toBeInTheDocument()
   })
 })

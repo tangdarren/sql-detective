@@ -9,6 +9,7 @@ type QueryFeedbackProps = {
   errorType?: QueryErrorType | null
   hasNextLevel: boolean
   onContinue: () => void
+  onCloseCase?: () => void
 }
 
 function toneFor(errorType?: QueryErrorType | null, correct?: boolean): string {
@@ -30,6 +31,7 @@ function QueryFeedback({
   errorType,
   hasNextLevel,
   onContinue,
+  onCloseCase,
 }: QueryFeedbackProps) {
   return (
     <section
@@ -60,9 +62,14 @@ function QueryFeedback({
         <PrimaryButton onClick={onContinue}>Continue Investigation</PrimaryButton>
       ) : null}
       {correct && !hasNextLevel ? (
-        <p className="query-feedback__finale">
-          The Blackwood Hotel file is closed. The thief has been identified.
-        </p>
+        <>
+          <p className="query-feedback__finale">
+            The Blackwood Hotel file is ready to close. The thief has been identified.
+          </p>
+          {onCloseCase ? (
+            <PrimaryButton onClick={onCloseCase}>Close the Case</PrimaryButton>
+          ) : null}
+        </>
       ) : null}
     </section>
   )

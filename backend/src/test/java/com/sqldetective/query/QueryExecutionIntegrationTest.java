@@ -49,7 +49,7 @@ class QueryExecutionIntegrationTest extends PostgresIntegrationTest {
             FROM room_access_logs
             WHERE room_number = 417
               AND entry_time BETWEEN TIMESTAMPTZ '2024-11-04 00:00:00+00'
-                                 AND TIMESTAMPTZ '2024-11-04 01:00:00+00'
+                                 AND TIMESTAMPTZ '2024-11-04 02:00:00+00'
             """;
 
     @Autowired
@@ -75,7 +75,7 @@ class QueryExecutionIntegrationTest extends PostgresIntegrationTest {
                 .andExpect(jsonPath("$.correct").value(true))
                 .andExpect(jsonPath("$.rowCount").value(6))
                 .andExpect(jsonPath("$.feedback").value(
-                        "Several guests stayed on the fourth floor near Room 417 that night."
+                        "Several guests stayed on the fourth floor near Room 417 that night — including the guest in Room 410 beside the crime scene."
                 ))
                 .andExpect(jsonPath("$.errorType").doesNotExist())
                 .andExpect(jsonPath("$.columns[0]").value("full_name"));

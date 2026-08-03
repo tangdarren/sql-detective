@@ -39,7 +39,8 @@ public class ChallengeService {
                 challenge.starterQuery(),
                 challenge.hint(),
                 challenge.difficulty(),
-                challenge.orderSensitive()
+                challenge.orderSensitive(),
+                challenge.evidenceImageFilename()
         );
     }
 }

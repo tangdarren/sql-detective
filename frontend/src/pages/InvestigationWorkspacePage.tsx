@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   executeQuery,
   fetchCase,
@@ -18,8 +19,8 @@ import type {
 import { ApiError } from '../api/types'
 import CaseBriefing from '../components/CaseBriefing'
 import CaseHeader from '../components/CaseHeader'
+import EvidenceIllustration from '../components/EvidenceIllustration'
 import EvidencePhoto from '../components/EvidencePhoto'
-import HotelIllustration from '../components/HotelIllustration'
 import LevelNavigation from '../components/LevelNavigation'
 import PrimaryButton from '../components/PrimaryButton'
 import QueryFeedback from '../components/QueryFeedback'
@@ -41,6 +42,7 @@ import './InvestigationWorkspacePage.css'
 type LoadState = 'loading' | 'ready' | 'empty' | 'unavailable'
 
 function InvestigationWorkspacePage() {
+  const navigate = useNavigate()
   const [loadState, setLoadState] = useState<LoadState>('loading')
   const [caseSummary, setCaseSummary] = useState<CaseSummary | null>(null)
   const [challengeSummaries, setChallengeSummaries] = useState<ChallengeSummary[]>([])
@@ -245,6 +247,10 @@ function InvestigationWorkspacePage() {
     }
   }
 
+  function handleCloseCase() {
+    navigate('/case/01/complete')
+  }
+
   function handleResetProgress() {
     const confirmed = window.confirm(
       'Reset all investigation progress and saved SQL drafts for this case?',
@@ -328,8 +334,12 @@ function InvestigationWorkspacePage() {
 
         <div className="workspace__body">
           <aside className="workspace__left">
-            <EvidencePhoto caption="Evidence photo — Blackwood Hotel">
-              <HotelIllustration variant="room" />
+            <EvidencePhoto
+              caption={`Evidence photo — Level ${activeLevel}${
+                challenge ? `: ${challenge.title}` : ''
+              }`}
+            >
+              <EvidenceIllustration filename={challenge?.evidenceImageFilename} />
             </EvidencePhoto>
             <LevelNavigation
               levels={navigationLevels}
@@ -380,6 +390,7 @@ function InvestigationWorkspacePage() {
                 errorType={result.errorType}
                 hasNextLevel={hasNextLevel}
                 onContinue={handleContinue}
+                onCloseCase={handleCloseCase}
               />
             ) : null}
           </section>

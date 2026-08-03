@@ -23,6 +23,7 @@ export type ChallengeDetail = {
   hint: string
   difficulty: string
   orderSensitive: boolean
+  evidenceImageFilename: string
 }
 
 export type TableSummary = {

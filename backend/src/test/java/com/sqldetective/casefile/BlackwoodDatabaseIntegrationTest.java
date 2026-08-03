@@ -31,7 +31,7 @@ class BlackwoodDatabaseIntegrationTest extends PostgresIntegrationTest {
                 Integer.class
         );
 
-        assertThat(migrationCount).isGreaterThanOrEqualTo(4);
+        assertThat(migrationCount).isGreaterThanOrEqualTo(5);
         assertThat(jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'guests'",
                 Integer.class
@@ -75,6 +75,7 @@ class BlackwoodDatabaseIntegrationTest extends PostgresIntegrationTest {
                 .andExpect(jsonPath("$.objective").exists())
                 .andExpect(jsonPath("$.starterQuery").exists())
                 .andExpect(jsonPath("$.hint").exists())
+                .andExpect(jsonPath("$.evidenceImageFilename").value("identify-thief.svg"))
                 .andExpect(jsonPath("$.successClue").doesNotExist())
                 .andExpect(jsonPath("$.expectedQuery").doesNotExist())
                 .andExpect(jsonPath("$.expectedRows").doesNotExist())
@@ -85,6 +86,30 @@ class BlackwoodDatabaseIntegrationTest extends PostgresIntegrationTest {
 
         assertThat(body.toLowerCase()).doesNotContain("julian pike");
         assertThat(body.toLowerCase()).doesNotContain("expected_query");
+        assertThat(body.toLowerCase()).doesNotContain("success_clue");
+    }
+
+    @Test
+    void everyChallengeHasEvidenceImageAndExpectedQuery() {
+        Integer incomplete = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM challenges
+                WHERE evidence_image_filename IS NULL
+                   OR TRIM(evidence_image_filename) = ''
+                   OR expected_query IS NULL
+                   OR TRIM(expected_query) = ''
+                   OR success_clue IS NULL
+                   OR TRIM(success_clue) = ''
+                """,
+                Integer.class
+        );
+        assertThat(incomplete).isZero();
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT evidence_image_filename FROM challenges WHERE level_number = 1",
+                String.class
+        )).isEqualTo("guest-registry.svg");
     }
 
     @Test

@@ -62,3 +62,16 @@ export function resetProgress(): void {
   localStorage.removeItem(COMPLETED_KEY)
   localStorage.removeItem(DRAFTS_KEY)
 }
+
+export function areAllLevelsCompleted(totalLevels: number): boolean {
+  if (totalLevels <= 0) {
+    return false
+  }
+  const completed = new Set(getCompletedLevels())
+  for (let level = 1; level <= totalLevels; level += 1) {
+    if (!completed.has(level)) {
+      return false
+    }
+  }
+  return true
+}

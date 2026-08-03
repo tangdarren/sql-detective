@@ -1,0 +1,116 @@
+.case-complete {
+  min-height: 100vh;
+  padding: 2rem 1.25rem 3rem;
+  background:
+    radial-gradient(circle at top, rgba(0, 0, 0, 0.04), transparent 45%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.015) 2px,
+      rgba(0, 0, 0, 0.015) 3px
+    ),
+    #f7f7f7;
+}
+
+.case-complete__folder {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 1.75rem;
+  border: 1px solid #111;
+  background: #fff;
+  position: relative;
+}
+
+.case-complete__stamp {
+  position: absolute;
+  top: 1.4rem;
+  right: 1.4rem;
+}
+
+.case-complete__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+  gap: 1.5rem;
+  margin-top: 1.25rem;
+}
+
+.case-complete__details {
+  min-width: 0;
+}
+
+.case-complete__thief-label {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.case-complete__thief-name {
+  margin: 0.35rem 0 0.85rem;
+  font-family: "Libre Baskerville", "Times New Roman", Times, serif;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  color: #8b1e1e;
+}
+
+.case-complete__copy,
+.case-complete__evidence,
+.case-complete__levels {
+  margin: 0;
+  line-height: 1.55;
+  color: #222;
+}
+
+.case-complete__section-title {
+  margin: 1.35rem 0 0.55rem;
+  font-family: "Libre Baskerville", "Times New Roman", Times, serif;
+  font-size: 1.1rem;
+}
+
+.case-complete__evidence,
+.case-complete__levels {
+  padding-left: 1.2rem;
+}
+
+.case-complete__evidence li + li,
+.case-complete__levels li + li {
+  margin-top: 0.55rem;
+}
+
+.case-complete__levels li {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.case-complete__levels span {
+  color: #444;
+}
+
+.case-complete__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.case-complete__secondary {
+  background: #fff;
+  color: #111;
+}
+
+.case-complete__secondary:hover {
+  background: #111;
+  color: #fff;
+}
+
+@media (max-width: 800px) {
+  .case-complete__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .case-complete__stamp {
+    position: static;
+    margin-bottom: 0.75rem;
+  }
+}

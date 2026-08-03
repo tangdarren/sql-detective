@@ -8,6 +8,7 @@ public record ChallengeDetailResponse(
         String starterQuery,
         String hint,
         String difficulty,
-        boolean orderSensitive
+        boolean orderSensitive,
+        String evidenceImageFilename
 ) {
 }

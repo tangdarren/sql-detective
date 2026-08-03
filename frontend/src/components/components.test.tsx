@@ -164,6 +164,7 @@ describe('major components', () => {
   })
 
   it('renders QueryFeedback for success and errors', () => {
+    const onCloseCase = vi.fn()
     const { rerender } = render(
       <QueryFeedback
         correct
@@ -175,6 +176,18 @@ describe('major components', () => {
 
     expect(screen.getByText('CASE SOLVED')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Continue Investigation' })).toBeInTheDocument()
+
+    rerender(
+      <QueryFeedback
+        correct
+        feedback="Final clue."
+        hasNextLevel={false}
+        onContinue={vi.fn()}
+        onCloseCase={onCloseCase}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Close the Case' })).toBeInTheDocument()
 
     rerender(
       <QueryFeedback
