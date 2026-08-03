@@ -14,7 +14,7 @@ Query the evidence. Solve the case.
 
 - Node.js 20+
 - Java 21+
-- Docker (for PostgreSQL)
+- Docker (for PostgreSQL and backend integration tests)
 
 ## Local setup
 
@@ -56,5 +56,13 @@ App: [http://localhost:5173](http://localhost:5173)
 | Frontend | `npm run typecheck` | TypeScript check |
 | Frontend | `npm test` | Vitest |
 | Frontend | `npm run build` | Production build |
-| Backend | `./mvnw test` | JUnit 5 tests |
+| Backend | `./mvnw test` | JUnit 5 + Testcontainers |
 | Backend | `./mvnw package` | Build JAR |
+
+## Case 01 API
+
+- `GET /api/cases/blackwood`
+- `GET /api/challenges`
+- `GET /api/challenges/{levelNumber}`
+- `GET /api/schema/tables`
+- `GET /api/schema/tables/{tableName}`
