@@ -64,5 +64,6 @@ App: [http://localhost:5173](http://localhost:5173)
 - `GET /api/cases/blackwood`
 - `GET /api/challenges`
 - `GET /api/challenges/{levelNumber}`
+- `POST /api/challenges/{levelNumber}/execute`
 - `GET /api/schema/tables`
 - `GET /api/schema/tables/{tableName}`

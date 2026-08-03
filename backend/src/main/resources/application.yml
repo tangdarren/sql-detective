@@ -9,5 +9,14 @@ spring:
     enabled: true
     locations: classpath:db/migration
 
+app:
+  readonly-datasource:
+    url: ${SPRING_READONLY_DATASOURCE_URL:${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/sql_detective}}
+    username: ${SPRING_READONLY_DATASOURCE_USERNAME:sql_detective_readonly}
+    password: ${SPRING_READONLY_DATASOURCE_PASSWORD:sql_detective_readonly}
+  query:
+    statement-timeout-ms: ${APP_QUERY_STATEMENT_TIMEOUT_MS:2000}
+    max-rows: ${APP_QUERY_MAX_ROWS:100}
+
 server:
   port: ${SERVER_PORT:8080}

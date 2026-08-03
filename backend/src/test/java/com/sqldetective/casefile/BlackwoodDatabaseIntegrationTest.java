@@ -31,7 +31,7 @@ class BlackwoodDatabaseIntegrationTest extends PostgresIntegrationTest {
                 Integer.class
         );
 
-        assertThat(migrationCount).isGreaterThanOrEqualTo(3);
+        assertThat(migrationCount).isGreaterThanOrEqualTo(4);
         assertThat(jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'guests'",
                 Integer.class
@@ -76,6 +76,7 @@ class BlackwoodDatabaseIntegrationTest extends PostgresIntegrationTest {
                 .andExpect(jsonPath("$.starterQuery").exists())
                 .andExpect(jsonPath("$.hint").exists())
                 .andExpect(jsonPath("$.successClue").doesNotExist())
+                .andExpect(jsonPath("$.expectedQuery").doesNotExist())
                 .andExpect(jsonPath("$.expectedRows").doesNotExist())
                 .andExpect(jsonPath("$.answerQuery").doesNotExist())
                 .andReturn()
@@ -83,6 +84,7 @@ class BlackwoodDatabaseIntegrationTest extends PostgresIntegrationTest {
                 .getContentAsString();
 
         assertThat(body.toLowerCase()).doesNotContain("julian pike");
+        assertThat(body.toLowerCase()).doesNotContain("expected_query");
     }
 
     @Test

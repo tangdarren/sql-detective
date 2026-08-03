@@ -20,7 +20,8 @@ public class ChallengeRepository {
             rs.getString("hint"),
             rs.getString("success_clue"),
             rs.getString("difficulty"),
-            rs.getBoolean("order_sensitive")
+            rs.getBoolean("order_sensitive"),
+            rs.getString("expected_query")
     );
 
     private final JdbcTemplate jdbcTemplate;
@@ -33,7 +34,7 @@ public class ChallengeRepository {
         return jdbcTemplate.query(
                 """
                 SELECT id, level_number, title, story_text, objective, starter_query,
-                       hint, success_clue, difficulty, order_sensitive
+                       hint, success_clue, difficulty, order_sensitive, expected_query
                 FROM challenges
                 ORDER BY level_number
                 """,
@@ -45,7 +46,7 @@ public class ChallengeRepository {
         List<ChallengeRecord> results = jdbcTemplate.query(
                 """
                 SELECT id, level_number, title, story_text, objective, starter_query,
-                       hint, success_clue, difficulty, order_sensitive
+                       hint, success_clue, difficulty, order_sensitive, expected_query
                 FROM challenges
                 WHERE level_number = ?
                 """,

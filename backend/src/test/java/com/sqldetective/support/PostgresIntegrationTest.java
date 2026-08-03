@@ -25,5 +25,10 @@ public abstract class PostgresIntegrationTest {
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
+        registry.add("app.readonly-datasource.url", POSTGRES::getJdbcUrl);
+        registry.add("app.readonly-datasource.username", () -> "sql_detective_readonly");
+        registry.add("app.readonly-datasource.password", () -> "sql_detective_readonly");
+        registry.add("app.query.statement-timeout-ms", () -> "1000");
+        registry.add("app.query.max-rows", () -> "100");
     }
 }

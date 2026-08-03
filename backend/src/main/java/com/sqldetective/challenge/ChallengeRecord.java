@@ -10,6 +10,7 @@ public record ChallengeRecord(
         String hint,
         String successClue,
         String difficulty,
-        boolean orderSensitive
+        boolean orderSensitive,
+        String expectedQuery
 ) {
 }
