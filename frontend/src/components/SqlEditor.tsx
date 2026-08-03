@@ -1,21 +1,70 @@
+import type { KeyboardEvent } from 'react'
 import './SqlEditor.css'
 
 type SqlEditorProps = {
   value: string
   onChange: (value: string) => void
   onRun: () => void
+  onReset: () => void
+  isRunning?: boolean
+  disabled?: boolean
 }
 
-function SqlEditor({ value, onChange, onRun }: SqlEditorProps) {
+function SqlEditor({
+  value,
+  onChange,
+  onRun,
+  onReset,
+  isRunning = false,
+  disabled = false,
+}: SqlEditorProps) {
+  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === 'Tab') {
+      event.preventDefault()
+      const target = event.currentTarget
+      const start = target.selectionStart
+      const end = target.selectionEnd
+      const nextValue = `${value.slice(0, start)}  ${value.slice(end)}`
+      onChange(nextValue)
+      requestAnimationFrame(() => {
+        target.selectionStart = start + 2
+        target.selectionEnd = start + 2
+      })
+      return
+    }
+
+    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+      event.preventDefault()
+      if (!isRunning && !disabled) {
+        onRun()
+      }
+    }
+  }
+
   return (
     <section className="sql-editor" aria-labelledby="sql-editor-title">
       <div className="sql-editor__header">
         <h2 id="sql-editor-title" className="sql-editor__title">
           SQL Editor
         </h2>
-        <button type="button" className="sql-editor__run" onClick={onRun}>
-          Run Query
-        </button>
+        <div className="sql-editor__actions">
+          <button
+            type="button"
+            className="sql-editor__reset"
+            onClick={onReset}
+            disabled={disabled || isRunning}
+          >
+            Reset Query
+          </button>
+          <button
+            type="button"
+            className="sql-editor__run"
+            onClick={onRun}
+            disabled={disabled || isRunning}
+          >
+            {isRunning ? 'Running…' : 'Run Query'}
+          </button>
+        </div>
       </div>
       <label className="sql-editor__label" htmlFor="sql-editor-input">
         Query
@@ -25,9 +74,13 @@ function SqlEditor({ value, onChange, onRun }: SqlEditorProps) {
         className="sql-editor__input"
         value={value}
         onChange={(event) => onChange(event.target.value)}
+        onKeyDown={handleKeyDown}
         spellCheck={false}
-        rows={8}
+        rows={10}
+        disabled={disabled}
+        aria-label="SQL query editor"
       />
+      <p className="sql-editor__shortcut">Press ⌘Enter or Ctrl+Enter to run.</p>
     </section>
   )
 }

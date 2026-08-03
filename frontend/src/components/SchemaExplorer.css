@@ -1,0 +1,79 @@
+.schema-explorer {
+  border: 1px solid #111;
+  background: #fff;
+  padding: 1rem 1.1rem;
+}
+
+.schema-explorer__title {
+  margin: 0 0 0.75rem;
+  font-family: "Libre Baskerville", "Times New Roman", Times, serif;
+  font-size: 1.1rem;
+}
+
+.schema-explorer__tables {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.schema-explorer__table {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid #bbb;
+  background: #fff;
+  color: #222;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.schema-explorer__table:hover,
+.schema-explorer__table--active {
+  border-color: #111;
+  background: #111;
+  color: #fff;
+}
+
+.schema-explorer__columns {
+  margin-top: 0.9rem;
+  border-top: 1px solid #ddd;
+  padding-top: 0.75rem;
+}
+
+.schema-explorer__columns-title {
+  margin: 0 0 0.55rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #555;
+}
+
+.schema-explorer__column-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.schema-explorer__column-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.schema-explorer__column-name {
+  font-family: "IBM Plex Mono", "Courier New", Courier, monospace;
+}
+
+.schema-explorer__column-type {
+  color: #666;
+}
+
+.schema-explorer__empty {
+  margin: 0.5rem 0 0;
+  color: #777;
+  font-size: 0.85rem;
+}

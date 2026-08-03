@@ -1,33 +1,330 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  executeQuery,
+  fetchCase,
+  fetchChallenge,
+  fetchChallenges,
+  fetchTable,
+  fetchTables,
+} from '../api/client'
+import type {
+  CaseSummary,
+  ChallengeDetail,
+  ChallengeSummary,
+  ColumnInfo,
+  QueryExecutionResult,
+  TableSummary,
+} from '../api/types'
+import { ApiError } from '../api/types'
 import CaseBriefing from '../components/CaseBriefing'
 import CaseHeader from '../components/CaseHeader'
 import EvidencePhoto from '../components/EvidencePhoto'
 import HotelIllustration from '../components/HotelIllustration'
 import LevelNavigation from '../components/LevelNavigation'
+import PrimaryButton from '../components/PrimaryButton'
+import QueryFeedback from '../components/QueryFeedback'
 import QueryResults from '../components/QueryResults'
+import SchemaExplorer from '../components/SchemaExplorer'
 import SqlEditor from '../components/SqlEditor'
-import { blackwoodHotelCase } from '../data/placeholderChallenge'
+import {
+  clearDraft,
+  getCompletedLevels,
+  getDraft,
+  getHighestUnlockedLevel,
+  isLevelUnlocked,
+  markLevelCompleted,
+  resetProgress,
+  saveDraft,
+} from '../lib/progressStorage'
 import './InvestigationWorkspacePage.css'
 
-function InvestigationWorkspacePage() {
-  const [activeLevelId, setActiveLevelId] = useState(blackwoodHotelCase.levels[0].id)
-  const [query, setQuery] = useState(blackwoodHotelCase.sampleQuery)
-  const [hasRunQuery, setHasRunQuery] = useState(false)
+type LoadState = 'loading' | 'ready' | 'empty' | 'unavailable'
 
-  const activeLevel = useMemo(
-    () =>
-      blackwoodHotelCase.levels.find((level) => level.id === activeLevelId)
-      ?? blackwoodHotelCase.levels[0],
-    [activeLevelId],
+function InvestigationWorkspacePage() {
+  const [loadState, setLoadState] = useState<LoadState>('loading')
+  const [caseSummary, setCaseSummary] = useState<CaseSummary | null>(null)
+  const [challengeSummaries, setChallengeSummaries] = useState<ChallengeSummary[]>([])
+  const [activeLevel, setActiveLevel] = useState(1)
+  const [challenge, setChallenge] = useState<ChallengeDetail | null>(null)
+  const [challengeLoading, setChallengeLoading] = useState(false)
+  const [query, setQuery] = useState('')
+  const [completedLevels, setCompletedLevels] = useState<number[]>(() => getCompletedLevels())
+  const [showHint, setShowHint] = useState(false)
+  const [tables, setTables] = useState<TableSummary[]>([])
+  const [selectedTable, setSelectedTable] = useState<string | null>(null)
+  const [columns, setColumns] = useState<ColumnInfo[]>([])
+  const [columnsLoading, setColumnsLoading] = useState(false)
+  const [isRunning, setIsRunning] = useState(false)
+  const [result, setResult] = useState<QueryExecutionResult | null>(null)
+  const [emptyResultMessage, setEmptyResultMessage] = useState(
+    'No results yet. Run a query to inspect the evidence.',
   )
+
+  const totalLevels = challengeSummaries.length
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadWorkspace() {
+      setLoadState('loading')
+      try {
+        const [caseData, challenges, tableData] = await Promise.all([
+          fetchCase(),
+          fetchChallenges(),
+          fetchTables(),
+        ])
+
+        if (cancelled) {
+          return
+        }
+
+        if (challenges.length === 0) {
+          setLoadState('empty')
+          return
+        }
+
+        const unlocked = getHighestUnlockedLevel(challenges.length)
+        setCaseSummary(caseData)
+        setChallengeSummaries(challenges)
+        setTables(tableData)
+        setActiveLevel(unlocked)
+        setCompletedLevels(getCompletedLevels())
+        setLoadState('ready')
+      } catch {
+        if (!cancelled) {
+          setLoadState('unavailable')
+        }
+      }
+    }
+
+    void loadWorkspace()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (loadState !== 'ready' || totalLevels === 0) {
+      return
+    }
+
+    let cancelled = false
+
+    async function loadChallenge(levelNumber: number) {
+      setChallengeLoading(true)
+      setResult(null)
+      setShowHint(false)
+      setEmptyResultMessage('No results yet. Run a query to inspect the evidence.')
+
+      try {
+        const detail = await fetchChallenge(levelNumber)
+        if (cancelled) {
+          return
+        }
+        setChallenge(detail)
+        const draft = getDraft(levelNumber)
+        setQuery(draft ?? detail.starterQuery)
+      } catch {
+        if (!cancelled) {
+          setLoadState('unavailable')
+        }
+      } finally {
+        if (!cancelled) {
+          setChallengeLoading(false)
+        }
+      }
+    }
+
+    void loadChallenge(activeLevel)
+    return () => {
+      cancelled = true
+    }
+  }, [activeLevel, loadState, totalLevels])
+
+  useEffect(() => {
+    if (!selectedTable) {
+      setColumns([])
+      return
+    }
+
+    let cancelled = false
+
+    async function loadColumns(tableName: string) {
+      setColumnsLoading(true)
+      try {
+        const details = await fetchTable(tableName)
+        if (!cancelled) {
+          setColumns(details.columns)
+        }
+      } catch {
+        if (!cancelled) {
+          setColumns([])
+        }
+      } finally {
+        if (!cancelled) {
+          setColumnsLoading(false)
+        }
+      }
+    }
+
+    void loadColumns(selectedTable)
+    return () => {
+      cancelled = true
+    }
+  }, [selectedTable])
+
+  const navigationLevels = useMemo(
+    () =>
+      challengeSummaries.map((item) => ({
+        id: item.levelNumber,
+        title: item.title,
+        completed: completedLevels.includes(item.levelNumber),
+        locked: !isLevelUnlocked(item.levelNumber, totalLevels),
+      })),
+    [challengeSummaries, completedLevels, totalLevels],
+  )
+
+  function handleQueryChange(nextQuery: string) {
+    setQuery(nextQuery)
+    saveDraft(activeLevel, nextQuery)
+  }
+
+  function handleResetQuery() {
+    if (!challenge) {
+      return
+    }
+    setQuery(challenge.starterQuery)
+    clearDraft(activeLevel)
+    setResult(null)
+    setEmptyResultMessage('No results yet. Run a query to inspect the evidence.')
+  }
+
+  async function handleRunQuery() {
+    if (!challenge || isRunning) {
+      return
+    }
+
+    setIsRunning(true)
+    setResult(null)
+
+    try {
+      const execution = await executeQuery(activeLevel, query)
+      setResult(execution)
+
+      if (execution.correct) {
+        const nextCompleted = markLevelCompleted(activeLevel)
+        setCompletedLevels(nextCompleted)
+      }
+
+      if (!execution.errorType && execution.rowCount === 0) {
+        setEmptyResultMessage('Your query ran, but returned no rows.')
+      }
+    } catch (error) {
+      const message =
+        error instanceof ApiError
+          ? error.message
+          : 'The investigation archive is unavailable right now.'
+      setResult({
+        columns: [],
+        rows: [],
+        rowCount: 0,
+        executionTimeMs: 0,
+        correct: false,
+        feedback: message,
+        errorType: 'EXECUTION_ERROR',
+      })
+    } finally {
+      setIsRunning(false)
+    }
+  }
+
+  function handleContinue() {
+    const nextLevel = activeLevel + 1
+    if (nextLevel <= totalLevels) {
+      setActiveLevel(nextLevel)
+    }
+  }
+
+  function handleResetProgress() {
+    const confirmed = window.confirm(
+      'Reset all investigation progress and saved SQL drafts for this case?',
+    )
+    if (!confirmed) {
+      return
+    }
+
+    resetProgress()
+    setCompletedLevels([])
+    setResult(null)
+    setShowHint(false)
+    setEmptyResultMessage('No results yet. Run a query to inspect the evidence.')
+    if (activeLevel === 1) {
+      const first = challengeSummaries[0]
+      if (first) {
+        void fetchChallenge(1).then((detail) => {
+          setChallenge(detail)
+          setQuery(detail.starterQuery)
+        })
+      }
+    } else {
+      setActiveLevel(1)
+    }
+  }
+
+  function handleSelectLevel(levelId: number) {
+    if (!isLevelUnlocked(levelId, totalLevels)) {
+      return
+    }
+    setActiveLevel(levelId)
+  }
+
+  if (loadState === 'loading') {
+    return (
+      <main className="workspace">
+        <div className="workspace__status" role="status">
+          Opening the case file…
+        </div>
+      </main>
+    )
+  }
+
+  if (loadState === 'unavailable') {
+    return (
+      <main className="workspace">
+        <div className="workspace__status workspace__status--error" role="alert">
+          <h1>Archive unavailable</h1>
+          <p>The investigation server could not be reached. Start the backend and try again.</p>
+          <PrimaryButton onClick={() => window.location.reload()}>Retry</PrimaryButton>
+        </div>
+      </main>
+    )
+  }
+
+  if (loadState === 'empty') {
+    return (
+      <main className="workspace">
+        <div className="workspace__status" role="status">
+          <h1>No challenges found</h1>
+          <p>This case file has no investigation levels yet.</p>
+        </div>
+      </main>
+    )
+  }
+
+  const hasNextLevel = activeLevel < totalLevels
 
   return (
     <main className="workspace">
       <div className="workspace__folder">
-        <CaseHeader
-          title={blackwoodHotelCase.title}
-          subtitle="Investigation Workspace"
-        />
+        <div className="workspace__top">
+          <CaseHeader
+            title={caseSummary?.title ?? 'Case 01: The Blackwood Hotel'}
+            subtitle={`Investigation Workspace · Level ${activeLevel}`}
+          />
+          <button type="button" className="workspace__reset-progress" onClick={handleResetProgress}>
+            Reset Progress
+          </button>
+        </div>
 
         <div className="workspace__body">
           <aside className="workspace__left">
@@ -35,24 +332,68 @@ function InvestigationWorkspacePage() {
               <HotelIllustration variant="room" />
             </EvidencePhoto>
             <LevelNavigation
-              levels={blackwoodHotelCase.levels}
-              activeLevelId={activeLevel.id}
-              onSelectLevel={setActiveLevelId}
+              levels={navigationLevels}
+              activeLevelId={activeLevel}
+              onSelectLevel={handleSelectLevel}
+            />
+            <SchemaExplorer
+              tables={tables}
+              selectedTable={selectedTable}
+              columns={columns}
+              isLoadingColumns={columnsLoading}
+              onSelectTable={setSelectedTable}
             />
           </aside>
 
           <section className="workspace__right">
-            <CaseBriefing title={activeLevel.title} objective={activeLevel.objective} />
+            {challengeLoading || !challenge ? (
+              <div className="workspace__panel-status" role="status">
+                Loading challenge…
+              </div>
+            ) : (
+              <CaseBriefing
+                levelNumber={challenge.levelNumber}
+                title={challenge.title}
+                storyText={challenge.storyText}
+                objective={challenge.objective}
+                hint={challenge.hint}
+                showHint={showHint}
+                onToggleHint={() => setShowHint((value) => !value)}
+              />
+            )}
+
             <SqlEditor
               value={query}
-              onChange={setQuery}
-              onRun={() => setHasRunQuery(true)}
+              onChange={handleQueryChange}
+              onRun={() => {
+                void handleRunQuery()
+              }}
+              onReset={handleResetQuery}
+              isRunning={isRunning}
+              disabled={challengeLoading || !challenge}
             />
+
+            {result ? (
+              <QueryFeedback
+                correct={result.correct}
+                feedback={result.feedback}
+                errorType={result.errorType}
+                hasNextLevel={hasNextLevel}
+                onContinue={handleContinue}
+              />
+            ) : null}
           </section>
         </div>
 
         <div className="workspace__bottom">
-          <QueryResults rows={hasRunQuery ? blackwoodHotelCase.sampleResults : []} />
+          <QueryResults
+            columns={result?.columns ?? []}
+            rows={result?.rows ?? []}
+            rowCount={result?.rowCount}
+            executionTimeMs={result?.executionTimeMs}
+            emptyMessage={emptyResultMessage}
+            isProcessing={isRunning}
+          />
         </div>
       </div>
     </main>

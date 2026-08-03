@@ -26,7 +26,7 @@
   transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
-.level-navigation__item:hover {
+.level-navigation__item:hover:not(:disabled) {
   border-color: #111;
   background: #f4f4f4;
 }
@@ -37,11 +37,27 @@
   color: #fff;
 }
 
+.level-navigation__item--completed:not(.level-navigation__item--active) {
+  border-color: #444;
+}
+
+.level-navigation__item--locked {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .level-navigation__index {
   font-size: 0.8rem;
   letter-spacing: 0.08em;
 }
 
 .level-navigation__title {
+  flex: 1;
   font-size: 0.9rem;
+}
+
+.level-navigation__badge {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }

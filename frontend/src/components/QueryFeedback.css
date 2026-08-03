@@ -1,0 +1,48 @@
+.query-feedback {
+  border: 1px solid #111;
+  background: #fff;
+  padding: 1rem 1.1rem;
+  margin-top: 1rem;
+}
+
+.query-feedback--success {
+  border-color: #8b1e1e;
+}
+
+.query-feedback--warning {
+  background: #fff8f0;
+}
+
+.query-feedback--error {
+  background: #fff5f5;
+}
+
+.query-feedback--incorrect {
+  background: #f7f7f7;
+}
+
+.query-feedback__stamp {
+  margin-bottom: 0.75rem;
+}
+
+.query-feedback__title {
+  margin: 0;
+  font-family: "Libre Baskerville", "Times New Roman", Times, serif;
+  font-size: 1.15rem;
+}
+
+.query-feedback__message {
+  margin: 0.55rem 0 0;
+  line-height: 1.5;
+  color: #222;
+}
+
+.query-feedback__finale {
+  margin: 0.85rem 0 0;
+  color: #444;
+  font-size: 0.9rem;
+}
+
+.query-feedback .primary-button {
+  margin-top: 0.9rem;
+}

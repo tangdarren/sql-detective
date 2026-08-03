@@ -3,7 +3,7 @@ import ConfidentialStamp from '../components/ConfidentialStamp'
 import EvidencePhoto from '../components/EvidencePhoto'
 import HotelIllustration from '../components/HotelIllustration'
 import PrimaryButton from '../components/PrimaryButton'
-import { blackwoodHotelCase } from '../data/placeholderChallenge'
+import { blackwoodHotelCase } from '../data/blackwoodCase'
 import './CaseIntroductionPage.css'
 
 function CaseIntroductionPage() {

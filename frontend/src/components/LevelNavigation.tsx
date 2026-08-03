@@ -3,6 +3,8 @@ import './LevelNavigation.css'
 export type LevelNavItem = {
   id: number
   title: string
+  completed?: boolean
+  locked?: boolean
 }
 
 type LevelNavigationProps = {
@@ -18,21 +20,32 @@ function LevelNavigation({ levels, activeLevelId, onSelectLevel }: LevelNavigati
       <ol className="level-navigation__list">
         {levels.map((level) => {
           const isActive = level.id === activeLevelId
+          const classes = [
+            'level-navigation__item',
+            isActive ? 'level-navigation__item--active' : '',
+            level.completed ? 'level-navigation__item--completed' : '',
+            level.locked ? 'level-navigation__item--locked' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')
 
           return (
             <li key={level.id}>
               <button
                 type="button"
-                className={
-                  isActive
-                    ? 'level-navigation__item level-navigation__item--active'
-                    : 'level-navigation__item'
-                }
+                className={classes}
                 aria-current={isActive ? 'step' : undefined}
+                disabled={level.locked}
                 onClick={() => onSelectLevel(level.id)}
               >
                 <span className="level-navigation__index">{level.id}</span>
                 <span className="level-navigation__title">{level.title}</span>
+                {level.completed ? (
+                  <span className="level-navigation__badge">Solved</span>
+                ) : null}
+                {level.locked ? (
+                  <span className="level-navigation__badge">Locked</span>
+                ) : null}
               </button>
             </li>
           )

@@ -2,19 +2,21 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import './PrimaryButton.css'
 
-type ButtonAsButton = {
-  to?: undefined
-} & ButtonHTMLAttributes<HTMLButtonElement>
-
-type ButtonAsLink = {
-  to: string
+type CommonProps = {
   children: ReactNode
   className?: string
 }
 
-type PrimaryButtonProps = (ButtonAsButton | ButtonAsLink) & {
-  children: ReactNode
+type ButtonAsButton = CommonProps &
+  Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className' | 'children'> & {
+    to?: undefined
+  }
+
+type ButtonAsLink = CommonProps & {
+  to: string
 }
+
+type PrimaryButtonProps = ButtonAsButton | ButtonAsLink
 
 function PrimaryButton(props: PrimaryButtonProps) {
   const className = ['primary-button', props.className].filter(Boolean).join(' ')
