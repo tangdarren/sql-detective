@@ -285,16 +285,18 @@ function InvestigationWorkspacePage() {
     levelNumber: number
     columns: string[]
     values: string[]
-  }) {
+  }): boolean {
     const result = pinEvidence(CASE_01_ID, payload)
     setNotebookData(result.data)
     if (!result.ok && result.reason === 'limit') {
       setPinMessage('Notebook limit reached: you can pin up to 12 rows.')
-      return
+      return false
     }
     if (result.ok) {
       setPinMessage(null)
+      return true
     }
+    return false
   }
 
   function handleRestartCase() {

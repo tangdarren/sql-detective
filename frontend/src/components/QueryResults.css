@@ -67,22 +67,34 @@
 
 .query-results__pin-col {
   width: 1%;
-  padding: 0.35rem 0.4rem;
+  min-width: 3.25rem;
+  max-width: 4rem;
+  padding: 0.3rem 0.35rem;
   text-align: center;
   white-space: nowrap;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: #fff;
+}
+
+.query-results__table th.query-results__pin-col {
+  z-index: 2;
+  background: #f0f0f0;
 }
 
 .query-results__pin {
-  padding: 0.2rem 0.45rem;
+  padding: 0.18rem 0.4rem;
   border: 1px solid #111;
   background: #fff;
   color: #111;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   letter-spacing: 0.04em;
   cursor: pointer;
+  min-width: 2.6rem;
 }
 
-.query-results__pin:hover {
+.query-results__pin:hover:not(:disabled) {
   background: #111;
   color: #fff;
 }
@@ -90,6 +102,14 @@
 .query-results__pin:focus-visible {
   outline: 2px solid #111;
   outline-offset: 2px;
+}
+
+.query-results__pin:disabled,
+.query-results__pin--filed {
+  opacity: 1;
+  cursor: default;
+  background: #fff;
+  color: #333;
 }
 
 .query-results__pin-message {

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import './QueryResults.css'
 
 export type PinRowPayload = {
@@ -14,9 +15,11 @@ type QueryResultsProps = {
   emptyMessage?: string
   isProcessing?: boolean
   levelNumber?: number
-  onPinRow?: (payload: PinRowPayload) => void
+  onPinRow?: (payload: PinRowPayload) => boolean
   pinMessage?: string | null
 }
+
+const FILED_FEEDBACK_MS = 1800
 
 function formatCell(value: unknown): string {
   if (value === null || value === undefined) {
@@ -41,16 +44,62 @@ function QueryResults({
 }: QueryResultsProps) {
   const displayCount = rowCount ?? rows.length
   const canPin = typeof levelNumber === 'number' && typeof onPinRow === 'function'
+  const [filedRows, setFiledRows] = useState<Set<number>>(() => new Set())
+  const filedTimers = useRef<Map<number, number>>(new Map())
 
-  function handlePin(row: unknown[]) {
+  useEffect(() => {
+    setFiledRows(new Set())
+    for (const timerId of filedTimers.current.values()) {
+      window.clearTimeout(timerId)
+    }
+    filedTimers.current.clear()
+  }, [columns, rows])
+
+  useEffect(() => {
+    return () => {
+      for (const timerId of filedTimers.current.values()) {
+        window.clearTimeout(timerId)
+      }
+      filedTimers.current.clear()
+    }
+  }, [])
+
+  function markFiled(rowIndex: number) {
+    setFiledRows((current) => {
+      const next = new Set(current)
+      next.add(rowIndex)
+      return next
+    })
+
+    const existing = filedTimers.current.get(rowIndex)
+    if (existing != null) {
+      window.clearTimeout(existing)
+    }
+
+    const timerId = window.setTimeout(() => {
+      setFiledRows((current) => {
+        const next = new Set(current)
+        next.delete(rowIndex)
+        return next
+      })
+      filedTimers.current.delete(rowIndex)
+    }, FILED_FEEDBACK_MS)
+
+    filedTimers.current.set(rowIndex, timerId)
+  }
+
+  function handlePin(row: unknown[], rowIndex: number) {
     if (!canPin) {
       return
     }
-    onPinRow({
+    const pinned = onPinRow({
       levelNumber,
       columns: [...columns],
       values: row.map((cell) => formatCell(cell)),
     })
+    if (pinned) {
+      markFiled(rowIndex)
+    }
   }
 
   return (
@@ -94,24 +143,37 @@ function QueryResults({
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, rowIndex) => (
-                <tr key={`row-${rowIndex}`}>
-                  {canPin ? (
-                    <td className="query-results__pin-col">
-                      <button
-                        type="button"
-                        className="query-results__pin"
-                        onClick={() => handlePin(row)}
-                      >
-                        Pin
-                      </button>
-                    </td>
-                  ) : null}
-                  {columns.map((column, columnIndex) => (
-                    <td key={`${rowIndex}-${column}`}>{formatCell(row[columnIndex])}</td>
-                  ))}
-                </tr>
-              ))}
+              {rows.map((row, rowIndex) => {
+                const isFiled = filedRows.has(rowIndex)
+                return (
+                  <tr key={`row-${rowIndex}`}>
+                    {canPin ? (
+                      <td className="query-results__pin-col">
+                        <button
+                          type="button"
+                          className={
+                            isFiled
+                              ? 'query-results__pin query-results__pin--filed'
+                              : 'query-results__pin'
+                          }
+                          aria-label={
+                            isFiled
+                              ? `Row ${rowIndex + 1} filed in notebook`
+                              : `Pin row ${rowIndex + 1} as notebook evidence`
+                          }
+                          disabled={isFiled}
+                          onClick={() => handlePin(row, rowIndex)}
+                        >
+                          {isFiled ? 'Filed' : 'Pin'}
+                        </button>
+                      </td>
+                    ) : null}
+                    {columns.map((column, columnIndex) => (
+                      <td key={`${rowIndex}-${column}`}>{formatCell(row[columnIndex])}</td>
+                    ))}
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
