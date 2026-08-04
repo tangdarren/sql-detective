@@ -12,14 +12,14 @@ test('capture portfolio screenshots', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'SQL Detective.' })).toBeVisible()
   await page.screenshot({
-    path: path.join(shotDir, 'landing.png'),
+    path: path.join(shotDir, 'landing-page.png'),
     fullPage: true,
   })
 
   await page.goto('/case/01/investigate')
   await expect(page.getByRole('heading', { name: 'The Guest Registry' })).toBeVisible()
   await page.screenshot({
-    path: path.join(shotDir, 'workspace.png'),
+    path: path.join(shotDir, 'investigation-workspace.png'),
     fullPage: true,
   })
 })
