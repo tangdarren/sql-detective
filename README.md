@@ -4,6 +4,8 @@
 
 A short mystery game where you investigate a fictional hotel theft by writing real SQL against guest logs, staff records, access logs, and payments. One case, five levels, no accounts.
 
+- Persistent Detective Notebook for investigation notes and pinnable query-result evidence
+
 ## Architecture
 
 ```
@@ -12,7 +14,7 @@ React UI  →  Spring Boot API  →  PostgreSQL
                  └── read-only role for player queries
 ```
 
-The frontend loads challenges from the API and sends SQL to an execute endpoint. The backend accepts only a single read-only `SELECT`, runs it with a restricted database role, and compares the result to a hidden expected query.
+The frontend loads challenges from the API and sends SQL to an execute endpoint. Notebook notes and pinned evidence stay in browser local storage. The backend accepts only a single read-only `SELECT`, runs it with a restricted database role, and compares the result to a hidden expected query.
 
 **Stack:** React, TypeScript, Vite · Java 21, Spring Boot · PostgreSQL, Flyway
 

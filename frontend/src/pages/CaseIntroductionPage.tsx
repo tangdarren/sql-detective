@@ -6,6 +6,7 @@ import EvidencePhoto from '../components/EvidencePhoto'
 import InstructionsModal from '../components/InstructionsModal'
 import PrimaryButton from '../components/PrimaryButton'
 import { blackwoodHotelCase } from '../data/blackwoodCase'
+import { CASE_01_ID, clearNotebook } from '../lib/notebookStorage'
 import { resetProgress } from '../lib/progressStorage'
 import './CaseIntroductionPage.css'
 
@@ -14,12 +15,13 @@ function CaseIntroductionPage() {
 
   function handleRestartCase() {
     const confirmed = window.confirm(
-      'Restart Case 01? This clears completed levels and saved SQL drafts.',
+      'Restart Case 01? This clears completed levels, saved SQL drafts, notebook notes, and evidence clippings.',
     )
     if (!confirmed) {
       return
     }
     resetProgress()
+    clearNotebook(CASE_01_ID)
   }
 
   return (

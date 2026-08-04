@@ -180,5 +180,6 @@ export async function clearProgress(page: Page) {
   await page.addInitScript(() => {
     localStorage.removeItem('sql-detective:blackwood:completedLevels')
     localStorage.removeItem('sql-detective:blackwood:drafts')
+    localStorage.removeItem('sql-detective:case-01:notebook')
   })
 }

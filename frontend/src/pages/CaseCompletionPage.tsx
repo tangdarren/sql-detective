@@ -5,6 +5,7 @@ import EvidenceIllustration from '../components/EvidenceIllustration'
 import EvidencePhoto from '../components/EvidencePhoto'
 import PrimaryButton from '../components/PrimaryButton'
 import { blackwoodResolution } from '../data/blackwoodResolution'
+import { CASE_01_ID, clearNotebook } from '../lib/notebookStorage'
 import { areAllLevelsCompleted, resetProgress } from '../lib/progressStorage'
 import './CaseCompletionPage.css'
 
@@ -20,6 +21,7 @@ function CaseCompletionPage() {
 
   function handlePlayAgain() {
     resetProgress()
+    clearNotebook(CASE_01_ID)
     navigate('/case/01/investigate')
   }
 

@@ -144,4 +144,60 @@ describe('notebookStorage', () => {
       pinnedEvidence: [],
     })
   })
+
+  it('recovers safely from malformed or incomplete notebook storage', () => {
+    localStorage.setItem('sql-detective:case-01:notebook', '{not-json')
+    expect(getNotebookData(CASE_01_ID)).toEqual({
+      notes: '{not-json',
+      pinnedEvidence: [],
+    })
+
+    localStorage.setItem('sql-detective:case-01:notebook', JSON.stringify({ foo: 1 }))
+    expect(getNotebookData(CASE_01_ID)).toEqual({
+      notes: '',
+      pinnedEvidence: [],
+    })
+
+    localStorage.setItem(
+      'sql-detective:case-01:notebook',
+      JSON.stringify({
+        pinnedEvidence: [
+          null,
+          { levelNumber: 2, columns: ['name'], values: ['Ada'] },
+          { levelNumber: 'bad', columns: ['x'], values: ['y'] },
+          { id: 'keep', levelNumber: 1, columns: ['amount'], values: [42] },
+        ],
+      }),
+    )
+
+    const recovered = getNotebookData(CASE_01_ID)
+    expect(recovered.notes).toBe('')
+    expect(recovered.pinnedEvidence).toEqual([
+      {
+        id: buildPinnedEvidenceId(2, ['name'], ['Ada']),
+        levelNumber: 2,
+        columns: ['name'],
+        values: ['Ada'],
+      },
+      {
+        id: 'keep',
+        levelNumber: 1,
+        columns: ['amount'],
+        values: ['42'],
+      },
+    ])
+  })
+
+  it('persists notes and evidence across repeated reads', () => {
+    saveNotebookNotes(CASE_01_ID, 'Lobby lead')
+    pinEvidence(CASE_01_ID, {
+      levelNumber: 1,
+      columns: ['guest_name'],
+      values: ['Clara Whitmore'],
+    })
+
+    expect(getNotebookData(CASE_01_ID)).toEqual(getNotebookData(CASE_01_ID))
+    expect(getNotebookNotes(CASE_01_ID)).toBe('Lobby lead')
+    expect(getPinnedEvidence(CASE_01_ID)).toHaveLength(1)
+  })
 })

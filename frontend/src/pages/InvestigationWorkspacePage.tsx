@@ -272,7 +272,7 @@ function InvestigationWorkspacePage() {
 
   function handleClearNotebook() {
     clearNotebook(CASE_01_ID)
-    setNotebookData(getNotebookData(CASE_01_ID))
+    setNotebookData({ notes: '', pinnedEvidence: [] })
     setPinMessage(null)
   }
 
@@ -309,7 +309,7 @@ function InvestigationWorkspacePage() {
 
     resetProgress()
     clearNotebook(CASE_01_ID)
-    setNotebookData(getNotebookData(CASE_01_ID))
+    setNotebookData({ notes: '', pinnedEvidence: [] })
     setPinMessage(null)
     setCompletedLevels([])
     setResult(null)

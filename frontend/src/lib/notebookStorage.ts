@@ -19,45 +19,74 @@ export type PinEvidenceResult =
   | { ok: true; data: NotebookData }
   | { ok: false; reason: 'duplicate' | 'limit'; data: NotebookData }
 
-const EMPTY_NOTEBOOK: NotebookData = {
-  notes: '',
-  pinnedEvidence: [],
+export type PinEvidenceInput = {
+  levelNumber: number
+  columns: string[]
+  values: string[]
 }
 
 function notebookKey(caseId: string): string {
   return `sql-detective:${caseId}:notebook`
 }
 
-function isPinnedEvidence(value: unknown): value is PinnedEvidence {
-  if (typeof value !== 'object' || value === null) {
-    return false
+function emptyNotebook(): NotebookData {
+  return { notes: '', pinnedEvidence: [] }
+}
+
+function asDisplayString(value: unknown): string {
+  if (value === null || value === undefined) {
+    return 'NULL'
   }
-  const row = value as Partial<PinnedEvidence>
-  return (
-    typeof row.id === 'string' &&
-    typeof row.levelNumber === 'number' &&
-    Array.isArray(row.columns) &&
-    Array.isArray(row.values) &&
-    row.columns.every((column) => typeof column === 'string') &&
-    row.values.every((cell) => typeof cell === 'string')
-  )
+  if (typeof value === 'boolean') {
+    return value ? 'true' : 'false'
+  }
+  return String(value)
+}
+
+function coercePinnedEvidence(value: unknown): PinnedEvidence | null {
+  if (typeof value !== 'object' || value === null) {
+    return null
+  }
+
+  const row = value as Record<string, unknown>
+  const levelNumber = row.levelNumber
+  if (typeof levelNumber !== 'number' || !Number.isInteger(levelNumber) || levelNumber < 1) {
+    return null
+  }
+  if (!Array.isArray(row.columns) || !Array.isArray(row.values)) {
+    return null
+  }
+
+  const columns = row.columns.map((column) => asDisplayString(column))
+  const values = row.values.map((cell) => asDisplayString(cell))
+  const id =
+    typeof row.id === 'string' && row.id.length > 0
+      ? row.id
+      : buildPinnedEvidenceId(levelNumber, columns, values)
+
+  return { id, levelNumber, columns, values }
 }
 
 function normalizeNotebookData(value: unknown): NotebookData | null {
-  if (typeof value !== 'object' || value === null) {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
     return null
   }
-  const data = value as Partial<NotebookData>
-  if (typeof data.notes !== 'string') {
+
+  const data = value as Record<string, unknown>
+  const looksLikeNotebook = 'notes' in data || 'pinnedEvidence' in data
+  if (!looksLikeNotebook) {
     return null
   }
-  const pinned = Array.isArray(data.pinnedEvidence)
-    ? data.pinnedEvidence.filter(isPinnedEvidence)
+
+  const notes = typeof data.notes === 'string' ? data.notes : ''
+  const pinnedEvidence = Array.isArray(data.pinnedEvidence)
+    ? data.pinnedEvidence
+        .map(coercePinnedEvidence)
+        .filter((row): row is PinnedEvidence => row !== null)
+        .slice(0, MAX_PINNED_EVIDENCE)
     : []
-  return {
-    notes: data.notes,
-    pinnedEvidence: pinned,
-  }
+
+  return { notes, pinnedEvidence }
 }
 
 function writeNotebookData(caseId: string, data: NotebookData): void {
@@ -80,7 +109,7 @@ export function getNotebookData(caseId: string): NotebookData {
   try {
     const raw = localStorage.getItem(notebookKey(caseId))
     if (!raw) {
-      return { ...EMPTY_NOTEBOOK, pinnedEvidence: [] }
+      return emptyNotebook()
     }
 
     try {
@@ -89,23 +118,27 @@ export function getNotebookData(caseId: string): NotebookData {
       if (normalized) {
         return normalized
       }
+      if (typeof parsed === 'string') {
+        return { notes: parsed, pinnedEvidence: [] }
+      }
+      // Parsed JSON that is not notebook-shaped (array, number, unrelated object).
+      return emptyNotebook()
     } catch {
       // Previous versions stored plain-text notes.
-    }
-
-    return {
-      notes: raw,
-      pinnedEvidence: [],
+      return { notes: raw, pinnedEvidence: [] }
     }
   } catch {
-    return { ...EMPTY_NOTEBOOK, pinnedEvidence: [] }
+    return emptyNotebook()
   }
 }
 
 export function saveNotebookData(caseId: string, data: NotebookData): NotebookData {
   const next: NotebookData = {
-    notes: data.notes,
-    pinnedEvidence: data.pinnedEvidence.filter(isPinnedEvidence).slice(0, MAX_PINNED_EVIDENCE),
+    notes: typeof data.notes === 'string' ? data.notes : '',
+    pinnedEvidence: data.pinnedEvidence
+      .map(coercePinnedEvidence)
+      .filter((row): row is PinnedEvidence => row !== null)
+      .slice(0, MAX_PINNED_EVIDENCE),
   }
   writeNotebookData(caseId, next)
   return next
@@ -124,12 +157,12 @@ export function getPinnedEvidence(caseId: string): PinnedEvidence[] {
   return getNotebookData(caseId).pinnedEvidence
 }
 
-export function pinEvidence(
-  caseId: string,
-  input: { levelNumber: number; columns: string[]; values: string[] },
-): PinEvidenceResult {
+export function pinEvidence(caseId: string, input: PinEvidenceInput): PinEvidenceResult {
   const current = getNotebookData(caseId)
-  const id = buildPinnedEvidenceId(input.levelNumber, input.columns, input.values)
+  const columns = input.columns.map((column) => asDisplayString(column))
+  const values = input.values.map((cell) => asDisplayString(cell))
+  const levelNumber = input.levelNumber
+  const id = buildPinnedEvidenceId(levelNumber, columns, values)
 
   if (current.pinnedEvidence.some((row) => row.id === id)) {
     return { ok: false, reason: 'duplicate', data: current }
@@ -145,9 +178,9 @@ export function pinEvidence(
       ...current.pinnedEvidence,
       {
         id,
-        levelNumber: input.levelNumber,
-        columns: [...input.columns],
-        values: [...input.values],
+        levelNumber,
+        columns,
+        values,
       },
     ],
   })
@@ -170,8 +203,4 @@ export function clearNotebook(caseId: string): void {
   } catch {
     // Ignore storage failures.
   }
-}
-
-export function clearNotebookNotes(caseId: string): void {
-  clearNotebook(caseId)
 }

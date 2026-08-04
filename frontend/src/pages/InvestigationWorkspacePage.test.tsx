@@ -202,16 +202,44 @@ describe('InvestigationWorkspacePage', () => {
     expect(getCompletedLevels()).toEqual([1])
     expect(getNotebookNotes(CASE_01_ID)).toBe('Restart should wipe notes')
     expect(getPinnedEvidence(CASE_01_ID)).toHaveLength(1)
+    expect(screen.getByText('Clara Whitmore')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Restart Case' }))
 
     expect(getCompletedLevels()).toEqual([])
     expect(getDraft(1)).toBeNull()
     expect(getNotebookData(CASE_01_ID)).toEqual({ notes: '', pinnedEvidence: [] })
-    expect(window.confirm).toHaveBeenCalled()
+    expect(window.confirm).toHaveBeenCalledWith(
+      expect.stringMatching(/notebook notes|evidence clippings/i),
+    )
     expect(await screen.findByRole('heading', { name: 'The Guest Registry' })).toBeInTheDocument()
     expect(screen.getByText(/Investigation Workspace · Level 1/i)).toBeInTheDocument()
+    expect(screen.getByLabelText('Investigation notes')).toHaveValue('')
     expect(screen.getByText('0 / 12 clippings')).toBeInTheDocument()
+    expect(screen.queryByText('Clara Whitmore')).not.toBeInTheDocument()
+  })
+
+  it('keeps notebook notes and clippings when changing levels', async () => {
+    const user = userEvent.setup()
+    markLevelCompleted(1)
+    saveNotebookNotes(CASE_01_ID, 'Keep across levels')
+    pinEvidence(CASE_01_ID, {
+      levelNumber: 1,
+      columns: ['guest_name'],
+      values: ['Clara Whitmore'],
+    })
+
+    await renderWorkspace('The Missing Master Key')
+
+    expect(screen.getByLabelText('Investigation notes')).toHaveValue('Keep across levels')
+    expect(screen.getByText('Clara Whitmore')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /The Guest Registry/i }))
+
+    expect(await screen.findByRole('heading', { name: 'The Guest Registry' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Investigation notes')).toHaveValue('Keep across levels')
+    expect(screen.getByText('Clara Whitmore')).toBeInTheDocument()
+    expect(getNotebookData(CASE_01_ID).pinnedEvidence).toHaveLength(1)
   })
 
   it('handles an unavailable backend', async () => {

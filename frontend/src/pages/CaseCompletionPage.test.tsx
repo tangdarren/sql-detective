@@ -1,6 +1,14 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
+import {
+  CASE_01_ID,
+  clearNotebook,
+  getNotebookData,
+  getNotebookNotes,
+  pinEvidence,
+  saveNotebookNotes,
+} from '../lib/notebookStorage'
 import { getCompletedLevels, markLevelCompleted, resetProgress } from '../lib/progressStorage'
 import { renderWithRouter } from '../test/renderWithRouter'
 import App from '../App'
@@ -9,6 +17,7 @@ import CaseCompletionPage from './CaseCompletionPage'
 describe('CaseCompletionPage', () => {
   beforeEach(() => {
     resetProgress()
+    clearNotebook(CASE_01_ID)
   })
 
   it('redirects away when the case is not complete', () => {
@@ -35,15 +44,23 @@ describe('CaseCompletionPage', () => {
     )
   })
 
-  it('resets progress when Play Again is clicked', async () => {
+  it('resets progress and notebook data when Play Again is clicked', async () => {
     const user = userEvent.setup()
     for (let level = 1; level <= 5; level += 1) {
       markLevelCompleted(level)
     }
+    saveNotebookNotes(CASE_01_ID, 'Old case notes')
+    pinEvidence(CASE_01_ID, {
+      levelNumber: 5,
+      columns: ['suspect'],
+      values: ['Julian Pike'],
+    })
 
     renderWithRouter(<App />, { route: '/case/01/complete' })
     await user.click(screen.getByRole('button', { name: 'Play Again' }))
 
     expect(getCompletedLevels()).toEqual([])
+    expect(getNotebookNotes(CASE_01_ID)).toBe('')
+    expect(getNotebookData(CASE_01_ID).pinnedEvidence).toEqual([])
   })
 })
