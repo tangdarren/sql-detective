@@ -20,6 +20,7 @@ import { ApiError } from '../api/types'
 import { resolveEvidenceAsset } from '../assets/evidenceCatalog'
 import CaseBriefing from '../components/CaseBriefing'
 import CaseHeader from '../components/CaseHeader'
+import DetectiveNotebook from '../components/DetectiveNotebook'
 import EvidenceIllustration from '../components/EvidenceIllustration'
 import EvidencePhoto from '../components/EvidencePhoto'
 import InstructionsModal from '../components/InstructionsModal'
@@ -29,6 +30,7 @@ import QueryFeedback from '../components/QueryFeedback'
 import QueryResults from '../components/QueryResults'
 import SchemaExplorer from '../components/SchemaExplorer'
 import SqlEditor from '../components/SqlEditor'
+import { CASE_01_ID } from '../lib/notebookStorage'
 import {
   clearDraft,
   getCompletedLevels,
@@ -379,6 +381,7 @@ function InvestigationWorkspacePage() {
               isLoadingColumns={columnsLoading}
               onSelectTable={setSelectedTable}
             />
+            <DetectiveNotebook caseId={CASE_01_ID} />
           </aside>
 
           <section className="workspace__right">
