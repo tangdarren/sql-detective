@@ -32,9 +32,10 @@ import SchemaExplorer from '../components/SchemaExplorer'
 import SqlEditor from '../components/SqlEditor'
 import {
   CASE_01_ID,
-  clearNotebookNotes,
+  clearNotebook,
   getNotebookData,
   pinEvidence,
+  removePinnedEvidence,
   saveNotebookNotes,
   type NotebookData,
 } from '../lib/notebookStorage'
@@ -270,8 +271,13 @@ function InvestigationWorkspacePage() {
   }
 
   function handleClearNotebook() {
-    clearNotebookNotes(CASE_01_ID)
+    clearNotebook(CASE_01_ID)
     setNotebookData(getNotebookData(CASE_01_ID))
+    setPinMessage(null)
+  }
+
+  function handleRemoveClipping(evidenceId: string) {
+    setNotebookData(removePinnedEvidence(CASE_01_ID, evidenceId))
     setPinMessage(null)
   }
 
@@ -293,13 +299,16 @@ function InvestigationWorkspacePage() {
 
   function handleRestartCase() {
     const confirmed = window.confirm(
-      'Restart Case 01? This clears completed levels and saved SQL drafts.',
+      'Restart Case 01? This clears completed levels, saved SQL drafts, notebook notes, and evidence clippings.',
     )
     if (!confirmed) {
       return
     }
 
     resetProgress()
+    clearNotebook(CASE_01_ID)
+    setNotebookData(getNotebookData(CASE_01_ID))
+    setPinMessage(null)
     setCompletedLevels([])
     setResult(null)
     setShowHint(false)
@@ -421,7 +430,8 @@ function InvestigationWorkspacePage() {
               notes={notebookData.notes}
               pinnedEvidence={notebookData.pinnedEvidence}
               onNotesChange={handleNotebookNotesChange}
-              onClear={handleClearNotebook}
+              onRemoveClipping={handleRemoveClipping}
+              onClearNotebook={handleClearNotebook}
             />
           </aside>
 

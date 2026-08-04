@@ -3,18 +3,19 @@ import {
   CASE_01_ID,
   MAX_PINNED_EVIDENCE,
   buildPinnedEvidenceId,
-  clearNotebookNotes,
+  clearNotebook,
   getNotebookData,
   getNotebookNotes,
   getPinnedEvidence,
   pinEvidence,
+  removePinnedEvidence,
   saveNotebookNotes,
 } from './notebookStorage'
 
 describe('notebookStorage', () => {
   beforeEach(() => {
-    clearNotebookNotes(CASE_01_ID)
-    clearNotebookNotes('case-02')
+    clearNotebook(CASE_01_ID)
+    clearNotebook('case-02')
   })
 
   it('saves and restores notes for a case', () => {
@@ -30,9 +31,9 @@ describe('notebookStorage', () => {
     expect(getNotebookNotes('case-02')).toBe('Case 02 notes')
   })
 
-  it('clears notes for a case', () => {
+  it('clears the notebook for a case', () => {
     saveNotebookNotes(CASE_01_ID, 'Temporary notes')
-    clearNotebookNotes(CASE_01_ID)
+    clearNotebook(CASE_01_ID)
     expect(getNotebookNotes(CASE_01_ID)).toBe('')
   })
 
@@ -109,14 +110,35 @@ describe('notebookStorage', () => {
     expect(getPinnedEvidence(CASE_01_ID)).toHaveLength(MAX_PINNED_EVIDENCE)
   })
 
-  it('clears pinned evidence with notebook notes', () => {
+  it('removes a single pinned clipping', () => {
+    const first = pinEvidence(CASE_01_ID, {
+      levelNumber: 1,
+      columns: ['name'],
+      values: ['Ada'],
+    })
+    expect(first.ok).toBe(true)
+    if (!first.ok) {
+      return
+    }
+    pinEvidence(CASE_01_ID, {
+      levelNumber: 1,
+      columns: ['name'],
+      values: ['Grace'],
+    })
+
+    const remaining = removePinnedEvidence(CASE_01_ID, first.data.pinnedEvidence[0].id)
+    expect(remaining.pinnedEvidence).toHaveLength(1)
+    expect(remaining.pinnedEvidence[0].values).toEqual(['Grace'])
+  })
+
+  it('clears notes and clippings together', () => {
     saveNotebookNotes(CASE_01_ID, 'Keep digging')
     pinEvidence(CASE_01_ID, {
       levelNumber: 3,
       columns: ['door'],
       values: ['B2'],
     })
-    clearNotebookNotes(CASE_01_ID)
+    clearNotebook(CASE_01_ID)
     expect(getNotebookData(CASE_01_ID)).toEqual({
       notes: '',
       pinnedEvidence: [],

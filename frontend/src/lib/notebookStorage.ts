@@ -155,10 +155,23 @@ export function pinEvidence(
   return { ok: true, data: next }
 }
 
-export function clearNotebookNotes(caseId: string): void {
+export function removePinnedEvidence(caseId: string, evidenceId: string): NotebookData {
+  const current = getNotebookData(caseId)
+  return saveNotebookData(caseId, {
+    ...current,
+    pinnedEvidence: current.pinnedEvidence.filter((row) => row.id !== evidenceId),
+  })
+}
+
+/** Clears written notes and evidence clippings for a case. */
+export function clearNotebook(caseId: string): void {
   try {
     localStorage.removeItem(notebookKey(caseId))
   } catch {
     // Ignore storage failures.
   }
+}
+
+export function clearNotebookNotes(caseId: string): void {
+  clearNotebook(caseId)
 }

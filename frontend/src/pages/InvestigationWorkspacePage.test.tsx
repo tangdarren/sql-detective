@@ -9,6 +9,15 @@ import {
   resetProgress,
   saveDraft,
 } from '../lib/progressStorage'
+import {
+  CASE_01_ID,
+  clearNotebook,
+  getNotebookData,
+  getNotebookNotes,
+  getPinnedEvidence,
+  pinEvidence,
+  saveNotebookNotes,
+} from '../lib/notebookStorage'
 import { renderWithRouter } from '../test/renderWithRouter'
 import {
   correctExecution,
@@ -69,6 +78,7 @@ async function renderWorkspace(expectedTitle = 'The Guest Registry') {
 describe('InvestigationWorkspacePage', () => {
   beforeEach(() => {
     resetProgress()
+    clearNotebook(CASE_01_ID)
     vi.clearAllMocks()
     mockSuccessfulWorkspaceLoad()
   })
@@ -175,23 +185,33 @@ describe('InvestigationWorkspacePage', () => {
     )
   })
 
-  it('resets progress and drafts', async () => {
+  it('resets progress, drafts, and notebook data', async () => {
     const user = userEvent.setup()
     saveDraft(1, 'SELECT 1;')
     localStorage.setItem('sql-detective:blackwood:completedLevels', JSON.stringify([1]))
+    saveNotebookNotes(CASE_01_ID, 'Restart should wipe notes')
+    pinEvidence(CASE_01_ID, {
+      levelNumber: 1,
+      columns: ['guest_name'],
+      values: ['Clara Whitmore'],
+    })
     vi.spyOn(window, 'confirm').mockReturnValue(true)
 
     await renderWorkspace('The Missing Master Key')
 
     expect(getCompletedLevels()).toEqual([1])
+    expect(getNotebookNotes(CASE_01_ID)).toBe('Restart should wipe notes')
+    expect(getPinnedEvidence(CASE_01_ID)).toHaveLength(1)
 
     await user.click(screen.getByRole('button', { name: 'Restart Case' }))
 
     expect(getCompletedLevels()).toEqual([])
     expect(getDraft(1)).toBeNull()
+    expect(getNotebookData(CASE_01_ID)).toEqual({ notes: '', pinnedEvidence: [] })
     expect(window.confirm).toHaveBeenCalled()
     expect(await screen.findByRole('heading', { name: 'The Guest Registry' })).toBeInTheDocument()
     expect(screen.getByText(/Investigation Workspace · Level 1/i)).toBeInTheDocument()
+    expect(screen.getByText('0 / 12 clippings')).toBeInTheDocument()
   })
 
   it('handles an unavailable backend', async () => {

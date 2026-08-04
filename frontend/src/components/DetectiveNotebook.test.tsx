@@ -1,13 +1,16 @@
 import { useState } from 'react'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   CASE_01_ID,
-  clearNotebookNotes,
+  MAX_PINNED_EVIDENCE,
+  clearNotebook,
   getNotebookData,
   getNotebookNotes,
+  getPinnedEvidence,
   pinEvidence,
+  removePinnedEvidence,
   saveNotebookNotes,
   type PinnedEvidence,
 } from '../lib/notebookStorage'
@@ -33,8 +36,13 @@ function NotebookHarness({
         setNotes(next.notes)
         setPinnedEvidence(next.pinnedEvidence)
       }}
-      onClear={() => {
-        clearNotebookNotes(CASE_01_ID)
+      onRemoveClipping={(evidenceId) => {
+        const next = removePinnedEvidence(CASE_01_ID, evidenceId)
+        setNotes(next.notes)
+        setPinnedEvidence(next.pinnedEvidence)
+      }}
+      onClearNotebook={() => {
+        clearNotebook(CASE_01_ID)
         setNotes('')
         setPinnedEvidence([])
       }}
@@ -44,7 +52,7 @@ function NotebookHarness({
 
 describe('DetectiveNotebook', () => {
   beforeEach(() => {
-    clearNotebookNotes(CASE_01_ID)
+    clearNotebook(CASE_01_ID)
     vi.restoreAllMocks()
   })
 
@@ -65,50 +73,106 @@ describe('DetectiveNotebook', () => {
     )
   })
 
-  it('renders pinned evidence from props', () => {
+  it('displays stored clipping values as filed records', () => {
     render(
       <NotebookHarness
         initialPinned={[
           {
-            id: '1',
+            id: 'clip-1',
             levelNumber: 2,
-            columns: ['guest_name', 'room_number'],
-            values: ['Clara Whitmore', '417'],
+            columns: ['guest_name', 'room_number', 'is_vip', 'checked_out', 'note'],
+            values: ['Clara Whitmore', '417', 'true', 'NULL', '2024-01-15'],
           },
         ]}
       />,
     )
 
-    expect(screen.getByText('Level 2')).toBeInTheDocument()
-    expect(screen.getByText('guest_name=Clara Whitmore · room_number=417')).toBeInTheDocument()
+    expect(screen.getByText('Evidence Clippings')).toBeInTheDocument()
+    expect(screen.getByText('1 / 12 clippings')).toBeInTheDocument()
+    expect(screen.getByText('Discovered · Level 2')).toBeInTheDocument()
+    expect(screen.getByText('guest_name')).toBeInTheDocument()
+    expect(screen.getByText('Clara Whitmore')).toBeInTheDocument()
+    expect(screen.getByText('417')).toBeInTheDocument()
+    expect(screen.getByText('true')).toBeInTheDocument()
+    expect(screen.getByText('NULL')).toBeInTheDocument()
+    expect(screen.getByText('2024-01-15')).toBeInTheDocument()
   })
 
-  it('clears notes after confirmation', async () => {
+  it('removes a single evidence clipping', async () => {
+    const user = userEvent.setup()
+    pinEvidence(CASE_01_ID, {
+      levelNumber: 1,
+      columns: ['name'],
+      values: ['Ada'],
+    })
+    pinEvidence(CASE_01_ID, {
+      levelNumber: 1,
+      columns: ['name'],
+      values: ['Grace'],
+    })
+    const data = getNotebookData(CASE_01_ID)
+
+    render(<NotebookHarness initialNotes={data.notes} initialPinned={data.pinnedEvidence} />)
+
+    expect(screen.getByText('2 / 12 clippings')).toBeInTheDocument()
+
+    const firstClipping = screen.getByText('Ada').closest('li')
+    expect(firstClipping).not.toBeNull()
+    await user.click(within(firstClipping as HTMLElement).getByRole('button', { name: 'Remove' }))
+
+    expect(screen.queryByText('Ada')).not.toBeInTheDocument()
+    expect(screen.getByText('Grace')).toBeInTheDocument()
+    expect(screen.getByText('1 / 12 clippings')).toBeInTheDocument()
+    expect(getPinnedEvidence(CASE_01_ID)).toHaveLength(1)
+  })
+
+  it('clears the complete notebook after confirmation', async () => {
     const user = userEvent.setup()
     saveNotebookNotes(CASE_01_ID, 'Scratch notes')
+    pinEvidence(CASE_01_ID, {
+      levelNumber: 3,
+      columns: ['door'],
+      values: ['B2'],
+    })
+    const data = getNotebookData(CASE_01_ID)
     vi.spyOn(window, 'confirm').mockReturnValue(true)
 
-    render(<NotebookHarness initialNotes="Scratch notes" />)
+    render(<NotebookHarness initialNotes={data.notes} initialPinned={data.pinnedEvidence} />)
 
-    await user.click(screen.getByRole('button', { name: 'Clear Notes' }))
+    await user.click(screen.getByRole('button', { name: 'Clear Notebook' }))
 
     expect(window.confirm).toHaveBeenCalled()
     expect(screen.getByLabelText('Investigation notes')).toHaveValue('')
-    expect(getNotebookNotes(CASE_01_ID)).toBe('')
+    expect(screen.getByText(`0 / ${MAX_PINNED_EVIDENCE} clippings`)).toBeInTheDocument()
+    expect(screen.queryByText('B2')).not.toBeInTheDocument()
+    expect(getNotebookData(CASE_01_ID)).toEqual({ notes: '', pinnedEvidence: [] })
   })
 
-  it('keeps notes when clear is cancelled', async () => {
+  it('keeps notebook content when clear is cancelled', async () => {
     const user = userEvent.setup()
     vi.spyOn(window, 'confirm').mockReturnValue(false)
 
-    render(<NotebookHarness initialNotes="Keep these" />)
+    render(
+      <NotebookHarness
+        initialNotes="Keep these"
+        initialPinned={[
+          {
+            id: 'keep',
+            levelNumber: 1,
+            columns: ['name'],
+            values: ['Ada'],
+          },
+        ]}
+      />,
+    )
 
-    await user.click(screen.getByRole('button', { name: 'Clear Notes' }))
+    await user.click(screen.getByRole('button', { name: 'Clear Notebook' }))
 
     expect(screen.getByLabelText('Investigation notes')).toHaveValue('Keep these')
+    expect(screen.getByText('Ada')).toBeInTheDocument()
   })
 
-  it('preserves pinned evidence when notes change', async () => {
+  it('preserves clippings when notes change', async () => {
     const user = userEvent.setup()
     pinEvidence(CASE_01_ID, {
       levelNumber: 1,
@@ -121,7 +185,7 @@ describe('DetectiveNotebook', () => {
 
     await user.type(screen.getByLabelText('Investigation notes'), ' lead')
 
-    expect(screen.getByText('name=Ada')).toBeInTheDocument()
+    expect(screen.getByText('Ada')).toBeInTheDocument()
     expect(getNotebookData(CASE_01_ID).pinnedEvidence).toHaveLength(1)
     expect(getNotebookNotes(CASE_01_ID)).toContain('lead')
   })
