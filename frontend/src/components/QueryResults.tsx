@@ -1,5 +1,11 @@
 import './QueryResults.css'
 
+export type PinRowPayload = {
+  levelNumber: number
+  columns: string[]
+  values: string[]
+}
+
 type QueryResultsProps = {
   columns: string[]
   rows: unknown[][]
@@ -7,6 +13,9 @@ type QueryResultsProps = {
   executionTimeMs?: number | null
   emptyMessage?: string
   isProcessing?: boolean
+  levelNumber?: number
+  onPinRow?: (payload: PinRowPayload) => void
+  pinMessage?: string | null
 }
 
 function formatCell(value: unknown): string {
@@ -26,8 +35,23 @@ function QueryResults({
   executionTimeMs,
   emptyMessage = 'No results yet. Run a query to inspect the evidence.',
   isProcessing = false,
+  levelNumber,
+  onPinRow,
+  pinMessage = null,
 }: QueryResultsProps) {
   const displayCount = rowCount ?? rows.length
+  const canPin = typeof levelNumber === 'number' && typeof onPinRow === 'function'
+
+  function handlePin(row: unknown[]) {
+    if (!canPin) {
+      return
+    }
+    onPinRow({
+      levelNumber,
+      columns: [...columns],
+      values: row.map((cell) => formatCell(cell)),
+    })
+  }
 
   return (
     <section className="query-results" aria-labelledby="query-results-title">
@@ -57,6 +81,11 @@ function QueryResults({
           <table className="query-results__table">
             <thead>
               <tr>
+                {canPin ? (
+                  <th scope="col" className="query-results__pin-col">
+                    Pin
+                  </th>
+                ) : null}
                 {columns.map((column) => (
                   <th key={column} scope="col">
                     {column}
@@ -67,6 +96,17 @@ function QueryResults({
             <tbody>
               {rows.map((row, rowIndex) => (
                 <tr key={`row-${rowIndex}`}>
+                  {canPin ? (
+                    <td className="query-results__pin-col">
+                      <button
+                        type="button"
+                        className="query-results__pin"
+                        onClick={() => handlePin(row)}
+                      >
+                        Pin
+                      </button>
+                    </td>
+                  ) : null}
                   {columns.map((column, columnIndex) => (
                     <td key={`${rowIndex}-${column}`}>{formatCell(row[columnIndex])}</td>
                   ))}
@@ -75,6 +115,12 @@ function QueryResults({
             </tbody>
           </table>
         </div>
+      ) : null}
+
+      {pinMessage ? (
+        <p className="query-results__pin-message" role="status">
+          {pinMessage}
+        </p>
       ) : null}
     </section>
   )

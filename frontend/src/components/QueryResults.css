@@ -64,3 +64,36 @@
 .query-results__table td {
   font-family: "IBM Plex Mono", "Courier New", Courier, monospace;
 }
+
+.query-results__pin-col {
+  width: 1%;
+  padding: 0.35rem 0.4rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.query-results__pin {
+  padding: 0.2rem 0.45rem;
+  border: 1px solid #111;
+  background: #fff;
+  color: #111;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.query-results__pin:hover {
+  background: #111;
+  color: #fff;
+}
+
+.query-results__pin:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 2px;
+}
+
+.query-results__pin-message {
+  margin: 0.65rem 0 0;
+  color: #444;
+  font-size: 0.8rem;
+}

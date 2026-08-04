@@ -30,7 +30,14 @@ import QueryFeedback from '../components/QueryFeedback'
 import QueryResults from '../components/QueryResults'
 import SchemaExplorer from '../components/SchemaExplorer'
 import SqlEditor from '../components/SqlEditor'
-import { CASE_01_ID } from '../lib/notebookStorage'
+import {
+  CASE_01_ID,
+  clearNotebookNotes,
+  getNotebookData,
+  pinEvidence,
+  saveNotebookNotes,
+  type NotebookData,
+} from '../lib/notebookStorage'
 import {
   clearDraft,
   getCompletedLevels,
@@ -66,6 +73,8 @@ function InvestigationWorkspacePage() {
   const [emptyResultMessage, setEmptyResultMessage] = useState(
     'No results yet. Run a query to inspect the evidence.',
   )
+  const [notebookData, setNotebookData] = useState<NotebookData>(() => getNotebookData(CASE_01_ID))
+  const [pinMessage, setPinMessage] = useState<string | null>(null)
 
   const totalLevels = challengeSummaries.length
 
@@ -256,6 +265,32 @@ function InvestigationWorkspacePage() {
     navigate('/case/01/complete')
   }
 
+  function handleNotebookNotesChange(notes: string) {
+    setNotebookData(saveNotebookNotes(CASE_01_ID, notes))
+  }
+
+  function handleClearNotebook() {
+    clearNotebookNotes(CASE_01_ID)
+    setNotebookData(getNotebookData(CASE_01_ID))
+    setPinMessage(null)
+  }
+
+  function handlePinRow(payload: {
+    levelNumber: number
+    columns: string[]
+    values: string[]
+  }) {
+    const result = pinEvidence(CASE_01_ID, payload)
+    setNotebookData(result.data)
+    if (!result.ok && result.reason === 'limit') {
+      setPinMessage('Notebook limit reached: you can pin up to 12 rows.')
+      return
+    }
+    if (result.ok) {
+      setPinMessage(null)
+    }
+  }
+
   function handleRestartCase() {
     const confirmed = window.confirm(
       'Restart Case 01? This clears completed levels and saved SQL drafts.',
@@ -381,7 +416,13 @@ function InvestigationWorkspacePage() {
               isLoadingColumns={columnsLoading}
               onSelectTable={setSelectedTable}
             />
-            <DetectiveNotebook caseId={CASE_01_ID} />
+            <DetectiveNotebook
+              caseId={CASE_01_ID}
+              notes={notebookData.notes}
+              pinnedEvidence={notebookData.pinnedEvidence}
+              onNotesChange={handleNotebookNotesChange}
+              onClear={handleClearNotebook}
+            />
           </aside>
 
           <section className="workspace__right">
@@ -433,6 +474,9 @@ function InvestigationWorkspacePage() {
             executionTimeMs={result?.executionTimeMs}
             emptyMessage={emptyResultMessage}
             isProcessing={isRunning}
+            levelNumber={activeLevel}
+            onPinRow={handlePinRow}
+            pinMessage={pinMessage}
           />
         </div>
       </div>

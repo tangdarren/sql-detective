@@ -70,3 +70,53 @@
 .detective-notebook__input::placeholder {
   color: #999;
 }
+
+.detective-notebook__evidence {
+  margin-top: 0.75rem;
+  border-top: 1px solid #ddd;
+  padding-top: 0.65rem;
+}
+
+.detective-notebook__evidence-title {
+  margin: 0 0 0.45rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.detective-notebook__evidence-empty {
+  margin: 0;
+  color: #777;
+  font-size: 0.75rem;
+}
+
+.detective-notebook__evidence-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.detective-notebook__evidence-item {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #ccc;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.detective-notebook__evidence-level {
+  color: #555;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+}
+
+.detective-notebook__evidence-values {
+  font-family: "IBM Plex Mono", "Courier New", Courier, monospace;
+  word-break: break-word;
+  white-space: normal;
+}
