@@ -33,6 +33,14 @@ function SqlEditor({
     }
   }, [])
 
+  useEffect(() => {
+    setCopied(false)
+    if (copiedTimer.current != null) {
+      window.clearTimeout(copiedTimer.current)
+      copiedTimer.current = null
+    }
+  }, [value])
+
   async function handleCopySql() {
     if (isEmpty || disabled) {
       return

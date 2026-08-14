@@ -147,4 +147,41 @@ describe('SqlEditor copy action', () => {
 
     expect(screen.getByRole('button', { name: 'Copy SQL to clipboard' })).toBeDisabled()
   })
+
+  it('clears Copied confirmation when the query changes', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    vi.stubGlobal('navigator', {
+      ...navigator,
+      clipboard: { writeText },
+    })
+
+    const { rerender } = render(
+      <SqlEditor
+        value="SELECT 1;"
+        onChange={vi.fn()}
+        onRun={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Copy SQL to clipboard' }))
+    expect(screen.getByRole('button', { name: 'SQL copied to clipboard' })).toHaveTextContent(
+      'Copied',
+    )
+
+    rerender(
+      <SqlEditor
+        value="SELECT 2;"
+        onChange={vi.fn()}
+        onRun={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Copy SQL to clipboard' })).toHaveTextContent(
+      'Copy SQL',
+    )
+  })
 })
