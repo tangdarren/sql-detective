@@ -8,7 +8,15 @@
 }
 
 .detective-notebook--collapsed {
-  padding: 0.55rem 0.85rem;
+  padding: 0.4rem 0.75rem;
+}
+
+.detective-notebook--collapsed .detective-notebook__header {
+  align-items: center;
+}
+
+.detective-notebook--collapsed .detective-notebook__title {
+  font-size: 0.9rem;
 }
 
 .detective-notebook__header {

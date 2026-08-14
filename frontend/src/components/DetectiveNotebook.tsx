@@ -58,7 +58,7 @@ function DetectiveNotebook({
           Detective Notebook
         </h2>
         <div className="detective-notebook__header-actions">
-          {!isOpen && pinnedEvidence.length > 0 ? (
+          {!isOpen ? (
             <span className="detective-notebook__clippings-count detective-notebook__clippings-count--header">
               {pinnedEvidence.length} / {MAX_PINNED_EVIDENCE} clippings
             </span>

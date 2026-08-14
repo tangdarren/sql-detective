@@ -91,6 +91,7 @@ describe('DetectiveNotebook', () => {
       'aria-expanded',
       'false',
     )
+    expect(screen.getByText('0 / 12 clippings')).toBeInTheDocument()
   })
 
   it('starts collapsed on narrow screens and can be opened', async () => {
@@ -100,6 +101,7 @@ describe('DetectiveNotebook', () => {
 
     expect(screen.queryByLabelText('Investigation notes')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Open Detective Notebook' })).toBeInTheDocument()
+    expect(screen.getByText('0 / 12 clippings')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Open Detective Notebook' }))
 
