@@ -1,4 +1,4 @@
-import type { KeyboardEvent } from 'react'
+import { useState, type KeyboardEvent } from 'react'
 import './SqlEditor.css'
 
 type SqlEditorProps = {
@@ -18,8 +18,20 @@ function SqlEditor({
   isRunning = false,
   disabled = false,
 }: SqlEditorProps) {
+  const [allowTabExit, setAllowTabExit] = useState(false)
+
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === 'Escape') {
+      setAllowTabExit(true)
+      return
+    }
+
     if (event.key === 'Tab') {
+      if (allowTabExit) {
+        setAllowTabExit(false)
+        return
+      }
+
       event.preventDefault()
       const target = event.currentTarget
       const start = target.selectionStart
@@ -38,6 +50,11 @@ function SqlEditor({
       if (!isRunning && !disabled) {
         onRun()
       }
+      return
+    }
+
+    if (allowTabExit && event.key !== 'Shift') {
+      setAllowTabExit(false)
     }
   }
 
@@ -73,14 +90,21 @@ function SqlEditor({
         id="sql-editor-input"
         className="sql-editor__input"
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) => {
+          setAllowTabExit(false)
+          onChange(event.target.value)
+        }}
         onKeyDown={handleKeyDown}
+        onBlur={() => setAllowTabExit(false)}
         spellCheck={false}
         rows={10}
         disabled={disabled}
         aria-label="SQL query editor"
+        aria-describedby="sql-editor-hints"
       />
-      <p className="sql-editor__shortcut">Press ⌘Enter or Ctrl+Enter to run.</p>
+      <p id="sql-editor-hints" className="sql-editor__shortcut">
+        Press ⌘Enter or Ctrl+Enter to run. Press Esc, then Tab to leave the editor.
+      </p>
     </section>
   )
 }
