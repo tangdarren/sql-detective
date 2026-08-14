@@ -5,6 +5,7 @@ import { ApiError } from '../api/types'
 import {
   getCompletedLevels,
   getDraft,
+  getQueryHistory,
   markLevelCompleted,
   resetProgress,
   saveDraft,
@@ -183,6 +184,27 @@ describe('InvestigationWorkspacePage', () => {
     expect(screen.getByLabelText('SQL query editor')).toHaveValue(
       'SELECT room_number FROM guests;',
     )
+  })
+
+  it('records query history and restores a previous query without running it', async () => {
+    const user = userEvent.setup()
+    executeQuery.mockResolvedValue(incorrectExecution)
+    await renderWorkspace()
+
+    const editor = screen.getByLabelText('SQL query editor')
+    fireEvent.change(editor, { target: { value: 'SELECT full_name FROM guests;' } })
+    await user.click(screen.getByRole('button', { name: 'Run Query' }))
+    expect(await screen.findByText('Not quite')).toBeInTheDocument()
+    expect(getQueryHistory(1)).toEqual(['SELECT full_name FROM guests;'])
+
+    fireEvent.change(editor, { target: { value: 'SELECT 1;' } })
+    expect(executeQuery).toHaveBeenCalledTimes(1)
+
+    await user.click(
+      screen.getByRole('button', { name: /Restore query: SELECT full_name FROM guests;/i }),
+    )
+    expect(screen.getByLabelText('SQL query editor')).toHaveValue('SELECT full_name FROM guests;')
+    expect(executeQuery).toHaveBeenCalledTimes(1)
   })
 
   it('resets progress, drafts, and notebook data', async () => {

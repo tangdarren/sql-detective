@@ -27,6 +27,7 @@ import InstructionsModal from '../components/InstructionsModal'
 import LevelNavigation from '../components/LevelNavigation'
 import PrimaryButton from '../components/PrimaryButton'
 import QueryFeedback from '../components/QueryFeedback'
+import QueryHistory from '../components/QueryHistory'
 import QueryResults from '../components/QueryResults'
 import SchemaExplorer from '../components/SchemaExplorer'
 import SqlEditor from '../components/SqlEditor'
@@ -41,11 +42,14 @@ import {
 } from '../lib/notebookStorage'
 import {
   clearDraft,
+  clearQueryHistory,
   getCompletedLevels,
   getDraft,
   getHighestUnlockedLevel,
+  getQueryHistory,
   isLevelUnlocked,
   markLevelCompleted,
+  pushQueryHistory,
   resetProgress,
   saveDraft,
 } from '../lib/progressStorage'
@@ -63,6 +67,7 @@ function InvestigationWorkspacePage() {
   const [challenge, setChallenge] = useState<ChallengeDetail | null>(null)
   const [challengeLoading, setChallengeLoading] = useState(false)
   const [query, setQuery] = useState('')
+  const [queryHistory, setQueryHistory] = useState<string[]>(() => getQueryHistory(1))
   const [completedLevels, setCompletedLevels] = useState<number[]>(() => getCompletedLevels())
   const [showHint, setShowHint] = useState(false)
   const [tables, setTables] = useState<TableSummary[]>([])
@@ -141,6 +146,7 @@ function InvestigationWorkspacePage() {
         setChallenge(detail)
         const draft = getDraft(levelNumber)
         setQuery(draft ?? detail.starterQuery)
+        setQueryHistory(getQueryHistory(levelNumber))
       } catch {
         if (!cancelled) {
           setLoadState('unavailable')
@@ -216,6 +222,15 @@ function InvestigationWorkspacePage() {
     setEmptyResultMessage('No results yet. Run a query to inspect the evidence.')
   }
 
+  function handleSelectHistoryQuery(historyQuery: string) {
+    handleQueryChange(historyQuery)
+  }
+
+  function handleClearQueryHistory() {
+    clearQueryHistory(activeLevel)
+    setQueryHistory([])
+  }
+
   async function handleRunQuery() {
     if (!challenge || isRunning) {
       return
@@ -223,6 +238,7 @@ function InvestigationWorkspacePage() {
 
     setIsRunning(true)
     setResult(null)
+    setQueryHistory(pushQueryHistory(activeLevel, query))
 
     try {
       const execution = await executeQuery(activeLevel, query)
@@ -312,6 +328,7 @@ function InvestigationWorkspacePage() {
     setNotebookData({ notes: '', pinnedEvidence: [] })
     setPinMessage(null)
     setCompletedLevels([])
+    setQueryHistory([])
     setResult(null)
     setShowHint(false)
     setEmptyResultMessage('No results yet. Run a query to inspect the evidence.')
@@ -463,6 +480,12 @@ function InvestigationWorkspacePage() {
               onReset={handleResetQuery}
               isRunning={isRunning}
               disabled={challengeLoading || !challenge}
+            />
+
+            <QueryHistory
+              queries={queryHistory}
+              onSelect={handleSelectHistoryQuery}
+              onClear={handleClearQueryHistory}
             />
 
             {result ? (
