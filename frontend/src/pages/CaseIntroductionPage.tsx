@@ -15,7 +15,7 @@ function CaseIntroductionPage() {
 
   function handleRestartCase() {
     const confirmed = window.confirm(
-      'Restart Case 01? This clears completed levels, saved SQL drafts, notebook notes, and evidence clippings.',
+      'Restart Case 01? This clears completed levels, saved SQL drafts, query history, notebook notes, and evidence clippings.',
     )
     if (!confirmed) {
       return
