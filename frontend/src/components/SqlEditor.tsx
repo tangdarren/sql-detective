@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import './SqlEditor.css'
 
 type SqlEditorProps = {
@@ -10,6 +10,8 @@ type SqlEditorProps = {
   disabled?: boolean
 }
 
+const COPIED_FEEDBACK_MS = 1800
+
 function SqlEditor({
   value,
   onChange,
@@ -19,6 +21,37 @@ function SqlEditor({
   disabled = false,
 }: SqlEditorProps) {
   const [allowTabExit, setAllowTabExit] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const copiedTimer = useRef<number | null>(null)
+  const isEmpty = value.trim().length === 0
+
+  useEffect(() => {
+    return () => {
+      if (copiedTimer.current != null) {
+        window.clearTimeout(copiedTimer.current)
+      }
+    }
+  }, [])
+
+  async function handleCopySql() {
+    if (isEmpty || disabled) {
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopied(true)
+      if (copiedTimer.current != null) {
+        window.clearTimeout(copiedTimer.current)
+      }
+      copiedTimer.current = window.setTimeout(() => {
+        setCopied(false)
+        copiedTimer.current = null
+      }, COPIED_FEEDBACK_MS)
+    } catch {
+      setCopied(false)
+    }
+  }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (event.key === 'Escape') {
@@ -65,6 +98,17 @@ function SqlEditor({
           SQL Editor
         </h2>
         <div className="sql-editor__actions">
+          <button
+            type="button"
+            className="sql-editor__reset"
+            onClick={() => {
+              void handleCopySql()
+            }}
+            disabled={disabled || isEmpty}
+            aria-label={copied ? 'SQL copied to clipboard' : 'Copy SQL to clipboard'}
+          >
+            {copied ? 'Copied' : 'Copy SQL'}
+          </button>
           <button
             type="button"
             className="sql-editor__reset"

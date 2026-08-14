@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import SqlEditor from './SqlEditor'
 
 describe('SqlEditor keyboard accessibility', () => {
@@ -99,5 +99,52 @@ describe('SqlEditor keyboard accessibility', () => {
       'aria-describedby',
       'sql-editor-hints',
     )
+  })
+})
+
+describe('SqlEditor copy action', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+  })
+
+  it('copies the current SQL to the clipboard and shows temporary confirmation', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    vi.stubGlobal('navigator', {
+      ...navigator,
+      clipboard: { writeText },
+    })
+
+    render(
+      <SqlEditor
+        value="SELECT full_name FROM guests;"
+        onChange={vi.fn()}
+        onRun={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Copy SQL to clipboard' }))
+
+    expect(writeText).toHaveBeenCalledWith('SELECT full_name FROM guests;')
+    expect(screen.getByRole('button', { name: 'SQL copied to clipboard' })).toHaveTextContent(
+      'Copied',
+    )
+
+    act(() => {
+      vi.advanceTimersByTime(1800)
+    })
+
+    expect(screen.getByRole('button', { name: 'Copy SQL to clipboard' })).toHaveTextContent(
+      'Copy SQL',
+    )
+  })
+
+  it('disables Copy SQL when the editor is empty', () => {
+    render(<SqlEditor value="   " onChange={vi.fn()} onRun={vi.fn()} onReset={vi.fn()} />)
+
+    expect(screen.getByRole('button', { name: 'Copy SQL to clipboard' })).toBeDisabled()
   })
 })
