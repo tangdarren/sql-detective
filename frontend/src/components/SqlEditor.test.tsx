@@ -1,7 +1,8 @@
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { createRef } from 'react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import SqlEditor from './SqlEditor'
+import SqlEditor, { type SqlEditorHandle } from './SqlEditor'
 
 describe('SqlEditor keyboard accessibility', () => {
   it('inserts spaces when Tab is pressed by default', () => {
@@ -99,6 +100,68 @@ describe('SqlEditor keyboard accessibility', () => {
       'aria-describedby',
       'sql-editor-hints',
     )
+  })
+})
+
+describe('SqlEditor schema insert', () => {
+  it('inserts an identifier at the remembered cursor position', async () => {
+    const onChange = vi.fn()
+    const editorRef = createRef<SqlEditorHandle>()
+    const { rerender } = render(
+      <SqlEditor
+        ref={editorRef}
+        value="SELECT  FROM guests"
+        onChange={onChange}
+        onRun={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    )
+
+    const textarea = screen.getByLabelText('SQL query editor') as HTMLTextAreaElement
+    textarea.focus()
+    textarea.setSelectionRange(7, 7)
+    fireEvent.select(textarea)
+
+    act(() => {
+      editorRef.current?.insertIdentifier('id')
+    })
+
+    expect(onChange).toHaveBeenCalledWith('SELECT id FROM guests')
+
+    act(() => {
+      rerender(
+        <SqlEditor
+          ref={editorRef}
+          value="SELECT id FROM guests"
+          onChange={onChange}
+          onRun={vi.fn()}
+          onReset={vi.fn()}
+        />,
+      )
+    })
+
+    expect(textarea.selectionStart).toBe(9)
+    expect(textarea.selectionEnd).toBe(9)
+  })
+
+  it('appends an identifier when the editor was never focused', () => {
+    const onChange = vi.fn()
+    const editorRef = createRef<SqlEditorHandle>()
+    render(
+      <SqlEditor
+        ref={editorRef}
+        value="SELECT"
+        onChange={onChange}
+        onRun={vi.fn()}
+        onReset={vi.fn()}
+      />,
+    )
+
+    act(() => {
+      editorRef.current?.insertIdentifier('guests')
+    })
+
+    expect(onChange).toHaveBeenCalledWith('SELECT guests')
   })
 })
 

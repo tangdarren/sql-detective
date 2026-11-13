@@ -99,15 +99,47 @@ describe('InvestigationWorkspacePage', () => {
     const user = userEvent.setup()
     await renderWorkspace()
 
-    expect(screen.getByRole('button', { name: 'guests' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'employees' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /guests\. Double-click to insert into query/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /employees\. Double-click to insert into query/i }),
+    ).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'guests' }))
+    await user.click(
+      screen.getByRole('button', { name: /guests\. Double-click to insert into query/i }),
+    )
 
     expect(await screen.findByText('guests columns')).toBeInTheDocument()
     expect(screen.getByText('full_name')).toBeInTheDocument()
     expect(screen.getByText('room_number')).toBeInTheDocument()
     expect(screen.getAllByText('integer').length).toBeGreaterThan(0)
+  })
+
+  it('inserts schema identifiers into the SQL editor', async () => {
+    const user = userEvent.setup()
+    await renderWorkspace()
+
+    await user.click(
+      screen.getByRole('button', { name: /guests\. Double-click to insert into query/i }),
+    )
+    expect(await screen.findByRole('button', { name: 'Insert full_name into query' })).toBeInTheDocument()
+
+    const editor = screen.getByLabelText('SQL query editor') as HTMLTextAreaElement
+    fireEvent.change(editor, { target: { value: 'SELECT' } })
+    await waitFor(() => {
+      expect(editor).toHaveValue('SELECT')
+    })
+    editor.focus()
+    editor.setSelectionRange(6, 6)
+    fireEvent.select(editor)
+
+    await user.click(screen.getByRole('button', { name: 'Insert full_name into query' }))
+
+    await waitFor(() => {
+      expect(editor).toHaveValue('SELECT full_name')
+    })
+    expect(getDraft(1)).toBe('SELECT full_name')
   })
 
   it('runs a correct query and unlocks the next level', async () => {

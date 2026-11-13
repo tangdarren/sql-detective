@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   executeQuery,
@@ -30,7 +30,7 @@ import QueryFeedback from '../components/QueryFeedback'
 import QueryHistory from '../components/QueryHistory'
 import QueryResults from '../components/QueryResults'
 import SchemaExplorer from '../components/SchemaExplorer'
-import SqlEditor from '../components/SqlEditor'
+import SqlEditor, { type SqlEditorHandle } from '../components/SqlEditor'
 import {
   CASE_01_ID,
   clearNotebook,
@@ -59,6 +59,7 @@ type LoadState = 'loading' | 'ready' | 'empty' | 'unavailable'
 
 function InvestigationWorkspacePage() {
   const navigate = useNavigate()
+  const sqlEditorRef = useRef<SqlEditorHandle>(null)
   const [loadState, setLoadState] = useState<LoadState>('loading')
   const [instructionsOpen, setInstructionsOpen] = useState(false)
   const [caseSummary, setCaseSummary] = useState<CaseSummary | null>(null)
@@ -210,6 +211,10 @@ function InvestigationWorkspacePage() {
   function handleQueryChange(nextQuery: string) {
     setQuery(nextQuery)
     saveDraft(activeLevel, nextQuery)
+  }
+
+  function handleInsertIdentifier(identifier: string) {
+    sqlEditorRef.current?.insertIdentifier(identifier)
   }
 
   function handleResetQuery() {
@@ -443,6 +448,7 @@ function InvestigationWorkspacePage() {
               columns={columns}
               isLoadingColumns={columnsLoading}
               onSelectTable={setSelectedTable}
+              onInsertIdentifier={handleInsertIdentifier}
             />
             <DetectiveNotebook
               caseId={CASE_01_ID}
@@ -472,6 +478,7 @@ function InvestigationWorkspacePage() {
             )}
 
             <SqlEditor
+              ref={sqlEditorRef}
               value={query}
               onChange={handleQueryChange}
               onRun={() => {
