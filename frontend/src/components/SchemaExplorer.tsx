@@ -7,6 +7,7 @@ type SchemaExplorerProps = {
   columns: ColumnInfo[]
   isLoadingColumns?: boolean
   onSelectTable: (tableName: string) => void
+  onInsertIdentifier?: (identifier: string) => void
 }
 
 function SchemaExplorer({
@@ -15,7 +16,10 @@ function SchemaExplorer({
   columns,
   isLoadingColumns = false,
   onSelectTable,
+  onInsertIdentifier,
 }: SchemaExplorerProps) {
+  const canInsert = typeof onInsertIdentifier === 'function'
+
   return (
     <section className="schema-explorer" aria-labelledby="schema-explorer-title">
       <h2 id="schema-explorer-title" className="schema-explorer__title">
@@ -36,6 +40,16 @@ function SchemaExplorer({
                     : 'schema-explorer__table'
                 }
                 onClick={() => onSelectTable(table.name)}
+                onDoubleClick={() => {
+                  if (canInsert) {
+                    onInsertIdentifier(table.name)
+                  }
+                }}
+                aria-label={
+                  canInsert
+                    ? `${table.name}. Double-click to insert into query`
+                    : table.name
+                }
               >
                 {table.name}
               </button>
@@ -53,8 +67,22 @@ function SchemaExplorer({
             <ul className="schema-explorer__column-list">
               {columns.map((column) => (
                 <li key={column.name}>
-                  <span className="schema-explorer__column-name">{column.name}</span>
-                  <span className="schema-explorer__column-type">{column.dataType}</span>
+                  {canInsert ? (
+                    <button
+                      type="button"
+                      className="schema-explorer__column"
+                      onClick={() => onInsertIdentifier(column.name)}
+                      aria-label={`Insert ${column.name} into query`}
+                    >
+                      <span className="schema-explorer__column-name">{column.name}</span>
+                      <span className="schema-explorer__column-type">{column.dataType}</span>
+                    </button>
+                  ) : (
+                    <>
+                      <span className="schema-explorer__column-name">{column.name}</span>
+                      <span className="schema-explorer__column-type">{column.dataType}</span>
+                    </>
+                  )}
                 </li>
               ))}
             </ul>
@@ -63,6 +91,12 @@ function SchemaExplorer({
       ) : (
         <p className="schema-explorer__empty">Select a table to inspect its columns.</p>
       )}
+
+      {canInsert ? (
+        <p className="schema-explorer__hint" id="schema-explorer-insert-hint">
+          Click a column to insert it. Double-click a table name to insert it.
+        </p>
+      ) : null}
     </section>
   )
 }

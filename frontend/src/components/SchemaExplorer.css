@@ -69,12 +69,45 @@
   font-size: 0.85rem;
 }
 
+.schema-explorer__column {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.schema-explorer__column:hover {
+  border-color: #bbb;
+  background: #f7f7f7;
+}
+
+.schema-explorer__column:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 2px;
+}
+
 .schema-explorer__column-name {
   font-family: "IBM Plex Mono", "Courier New", Courier, monospace;
 }
 
 .schema-explorer__column-type {
   color: #666;
+}
+
+.schema-explorer__hint {
+  margin: 0.75rem 0 0;
+  color: #666;
+  font-size: 0.78rem;
+  line-height: 1.35;
 }
 
 .schema-explorer__empty {

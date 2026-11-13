@@ -164,9 +164,43 @@ describe('major components', () => {
     expect(screen.getByText('guests columns')).toBeInTheDocument()
     expect(screen.getByText('full_name')).toBeInTheDocument()
     expect(screen.getByText('text')).toBeInTheDocument()
+    expect(screen.queryByText(/Click a column to insert/i)).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'employees' }))
     expect(onSelectTable).toHaveBeenCalledWith('employees')
+  })
+
+  it('lets SchemaExplorer insert table and column identifiers', async () => {
+    const user = userEvent.setup()
+    const onSelectTable = vi.fn()
+    const onInsertIdentifier = vi.fn()
+
+    render(
+      <SchemaExplorer
+        tables={[
+          { name: 'guests', description: 'Guests' },
+          { name: 'employees', description: 'Staff' },
+        ]}
+        selectedTable="guests"
+        columns={[
+          { name: 'full_name', dataType: 'text', nullable: false, defaultValue: null },
+          { name: 'room_number', dataType: 'integer', nullable: false, defaultValue: null },
+        ]}
+        onSelectTable={onSelectTable}
+        onInsertIdentifier={onInsertIdentifier}
+      />,
+    )
+
+    expect(screen.getByText(/Click a column to insert/i)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Insert full_name into query' }))
+    expect(onInsertIdentifier).toHaveBeenCalledWith('full_name')
+
+    await user.dblClick(
+      screen.getByRole('button', { name: 'employees. Double-click to insert into query' }),
+    )
+    expect(onSelectTable).toHaveBeenCalledWith('employees')
+    expect(onInsertIdentifier).toHaveBeenCalledWith('employees')
   })
 
   it('renders QueryFeedback for success and errors', () => {
